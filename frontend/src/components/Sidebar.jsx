@@ -19,24 +19,28 @@ function Sidebar({ onLogout }) {
       </div>
 
       <nav className="nav">
-        {items.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) =>
-              `nav-item ${isActive ? 'active' : ''}`
-            }
-          >
-            <Icon size={18} />
-            <span>{label}</span>
-          </NavLink>
-        ))}
+        <div className="nav-menu">
+          {items.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                `nav-item ${isActive ? 'active' : ''}`
+              }
+            >
+              <Icon size={18} />
+              <span>{label}</span>
+            </NavLink>
+          ))}
+        </div>
 
-        <button type="button" className="logout-button" onClick={onLogout}>
-          <LogOut size={18} />
-          <span>Logout</span>
-        </button>
+        <div className="sidebar-footer">
+          <button type="button" className="logout-button" onClick={onLogout}>
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+        </div>
       </nav>
     </aside>
   );
