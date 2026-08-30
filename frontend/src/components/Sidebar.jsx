@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShieldCheck, Users } from 'lucide-react';
+import { LayoutDashboard, LogOut, ShieldCheck, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const items = [
@@ -7,7 +7,7 @@ const items = [
   { to: '/roles', label: 'Role', icon: ShieldCheck },
 ];
 
-function Sidebar() {
+function Sidebar({ onLogout }) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -32,6 +32,11 @@ function Sidebar() {
             <span>{label}</span>
           </NavLink>
         ))}
+
+        <button type="button" className="logout-button" onClick={onLogout}>
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
       </nav>
     </aside>
   );
