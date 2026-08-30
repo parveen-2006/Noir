@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import LoginPage from './pages/LoginPage';
@@ -6,12 +7,16 @@ import DashboardPage from './pages/DashboardPage';
 import UserPage from './pages/UserPage';
 import RolePage from './pages/RolePage';
 import { api } from './services/api';
+import { loginSuccess, logout } from './store/authSlice';
+import { setUsers, addUser } from './store/userSlice';
+import { setRoles, addRole } from './store/roleSlice';
 import './styles.css';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const users = useSelector((state) => state.users.list);
+  const roles = useSelector((state) => state.roles.list);
 
   useEffect(() => {
     const loadData = async () => {
@@ -21,20 +26,20 @@ function App() {
           api.getRoles(),
         ]);
 
-        setUsers(userResponse.users || []);
-        setRoles(roleResponse.roles || []);
+        dispatch(setUsers(userResponse.users || []));
+        dispatch(setRoles(roleResponse.roles || []));
       } catch (error) {
         console.error('Failed to load app data:', error.message);
       }
     };
 
     loadData();
-  }, []);
+  }, [dispatch]);
 
   const handleLogin = async ({ email, password }) => {
     try {
-      await api.login({ email, password });
-      setIsAuthenticated(true);
+      const response = await api.login({ email, password });
+      dispatch(loginSuccess(response.user));
       return true;
     } catch (error) {
       console.error(error.message);
@@ -43,13 +48,13 @@ function App() {
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
+    dispatch(logout());
   };
 
   const handleCreateUser = async (newUser) => {
     try {
       const response = await api.createUser(newUser);
-      setUsers((current) => [response.user, ...current]);
+      dispatch(addUser(response.user));
       return true;
     } catch (error) {
       console.error(error.message);
@@ -60,7 +65,7 @@ function App() {
   const handleCreateRole = async (newRole) => {
     try {
       const response = await api.createRole(newRole);
-      setRoles((current) => [response.role, ...current]);
+      dispatch(addRole(response.role));
       return true;
     } catch (error) {
       console.error(error.message);
@@ -73,10 +78,10 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="flex min-h-screen bg-slate-950 text-slate-100">
       <Sidebar onLogout={handleLogout} />
 
-      <main className="content">
+      <main className="flex-1 p-4 md:p-8">
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/users" element={<UserPage onCreateUser={handleCreateUser} users={users} />} />
