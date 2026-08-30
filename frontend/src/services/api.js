@@ -1,36 +1,28 @@
+import axios from 'axios';
+
 const API_BASE_URL = 'http://localhost:5000/api';
 
-async function request(endpoint, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Request failed');
+apiClient.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    const message = error?.response?.data?.message || error?.message || 'Request failed';
+    return Promise.reject(new Error(message));
   }
-
-  return data;
-}
+);
 
 export const api = {
-  login: (payload) => request('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  }),
-  getUsers: () => request('/users'),
-  createUser: (payload) => request('/users', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  }),
-  getRoles: () => request('/roles'),
-  createRole: (payload) => request('/roles', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  }),
+  login: (payload) => apiClient.post('/auth/login', payload),
+  getUsers: () => apiClient.get('/users'),
+  createUser: (payload) => apiClient.post('/users', payload),
+  getRoles: () => apiClient.get('/roles'),
+  createRole: (payload) => apiClient.post('/roles', payload),
 };
+
+export const apiService = api;
