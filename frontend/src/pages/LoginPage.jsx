@@ -60,6 +60,7 @@ function LoginPage({ onLogin }) {
               value={form.email}
               onChange={handleChange}
               placeholder="Enter your email"
+              autoComplete="email"
               className="mt-1 block w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
             />
           </label>
@@ -72,6 +73,7 @@ function LoginPage({ onLogin }) {
               value={form.password}
               onChange={handleChange}
               placeholder="Enter your password"
+              autoComplete="current-password"
               className="mt-1 block w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
             />
           </label>

@@ -1,4 +1,17 @@
 import { useState } from 'react';
+import {
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 const emptyForm = {
   name: '',
@@ -37,79 +50,138 @@ function RolePage({ roles = [], onCreateRole }) {
     <div className="mx-auto max-w-6xl">
       <header className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">Access control</p>
-          <h1 className="text-3xl font-bold text-white md:text-4xl">Role</h1>
+          <Typography variant="overline" sx={{ color: '#a78bfa', letterSpacing: 2, display: 'block', mb: 1 }}>
+            Access control
+          </Typography>
+          <Typography variant="h3" sx={{ color: '#fff', fontWeight: 700 }}>
+            Role
+          </Typography>
         </div>
-        <button
-          type="button"
+        <Button
+          variant="contained"
           onClick={() => setIsOpen(true)}
-          className="rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-950/30 transition hover:opacity-95"
+          sx={{
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+            borderRadius: 2,
+            textTransform: 'none',
+            px: 2.5,
+            py: 1.25,
+            fontWeight: 600,
+          }}
         >
           Create role
-        </button>
+        </Button>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <Grid container spacing={2}>
         {roles.length === 0 ? (
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 text-slate-300 md:col-span-2 xl:col-span-3">
-            No roles created yet.
-          </div>
+          <Grid item xs={12}>
+            <Card sx={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(148,163,184,0.12)' }}>
+              <CardContent>
+                <Typography sx={{ color: '#cbd5e1' }}>No roles created yet.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ) : (
           roles.map((role) => (
-            <article key={`${role.name}-${role.email || 'role'}`} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-lg shadow-slate-950/25">
-              <div className="mb-4 inline-flex rounded-full bg-violet-500/10 px-3 py-1 text-sm font-semibold text-violet-300">
-                {role.name}
-              </div>
-              <p className="mb-5 text-sm text-slate-300">{role.description}</p>
-              <div className="flex items-center justify-between gap-3 text-sm text-sky-300">
-                <span>{role.users ?? 0} users</span>
-                <button type="button" className="text-white hover:text-violet-300">
-                  Manage
-                </button>
-              </div>
-            </article>
+            <Grid item xs={12} md={6} xl={4} key={`${role.name}-${role.email || 'role'}`}>
+              <Card
+                sx={{
+                  background: 'rgba(15,23,42,0.8)',
+                  border: '1px solid rgba(148,163,184,0.12)',
+                  boxShadow: '0 16px 40px rgba(15,23,42,0.22)',
+                  height: '100%',
+                }}
+              >
+                <CardContent>
+                  <Typography
+                    variant="button"
+                    sx={{
+                      display: 'inline-block',
+                      background: 'rgba(139,92,246,0.12)',
+                      color: '#d8b4fe',
+                      borderRadius: 999,
+                      px: 1.5,
+                      py: 0.75,
+                      mb: 2,
+                    }}
+                  >
+                    {role.name}
+                  </Typography>
+                  <Typography sx={{ color: '#cbd5e1', mb: 2 }}>{role.description}</Typography>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography sx={{ color: '#93c5fd' }}>{role.users ?? 0} users</Typography>
+                    <Button size="small" sx={{ color: '#fff' }}>
+                      Manage
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
           ))
         )}
-      </section>
+      </Grid>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4" onClick={() => setIsOpen(false)}>
-          <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl shadow-slate-950/60" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="text-xl font-semibold text-white">Create role</h2>
-              <button type="button" className="text-3xl text-slate-300" onClick={() => setIsOpen(false)}>
-                ×
-              </button>
-            </div>
-
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <label className="block text-sm text-slate-300">
-                <span className="mb-2 block">Name</span>
-                <input name="name" value={form.name} onChange={handleChange} placeholder="Role name" className="mt-1 block w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20" />
-              </label>
-
-              <label className="block text-sm text-slate-300">
-                <span className="mb-2 block">Email</span>
-                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="role@noir.com" className="mt-1 block w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20" />
-              </label>
-
-              <label className="block text-sm text-slate-300">
-                <span className="mb-2 block">Password</span>
-                <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Enter password" className="mt-1 block w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20" />
-              </label>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setIsOpen(false)} className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-slate-800">
-                  Cancel
-                </button>
-                <button type="submit" className="rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-95">
-                  Save role
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: '#fff', background: '#0f172a' }}>Create role</DialogTitle>
+        <form onSubmit={handleSubmit}>
+          <DialogContent sx={{ background: '#0f172a', pt: 2 }}>
+            <Stack spacing={2}>
+              <TextField
+                label="Name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="name"
+                inputProps={{ autoComplete: 'name' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+              <TextField
+                label="Email"
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="email"
+                inputProps={{ autoComplete: 'email' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+              <TextField
+                label="Password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="new-password"
+                inputProps={{ autoComplete: 'new-password' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ background: '#0f172a', px: 3, pb: 2 }}>
+            <Button onClick={() => setIsOpen(false)} sx={{ color: '#e2e8f0' }}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                borderRadius: 2,
+                textTransform: 'none',
+              }}
+            >
+              Save role
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 }

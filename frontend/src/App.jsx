@@ -15,10 +15,57 @@ import './styles.css';
 function App() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const expiresAt = useSelector((state) => state.auth.expiresAt);
   const users = useSelector((state) => state.users.list);
   const roles = useSelector((state) => state.roles.list);
 
   useEffect(() => {
+    const storedSession = api.getStoredSession();
+
+    if (!storedSession) {
+      return;
+    }
+
+    const remainingMs = Number(storedSession.expiresAt || 0) - Date.now();
+
+    if (remainingMs <= 0) {
+      api.clearSession();
+      dispatch(logout());
+      return;
+    }
+
+    if (!isAuthenticated) {
+      dispatch(
+        loginSuccess({
+          user: storedSession.user,
+          token: storedSession.token,
+          expiresAt: storedSession.expiresAt,
+        })
+      );
+    }
+  }, [dispatch, isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !expiresAt) return;
+
+    const remainingMs = Number(expiresAt) - Date.now();
+    if (remainingMs <= 0) {
+      api.clearSession();
+      dispatch(logout());
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      api.clearSession();
+      dispatch(logout());
+    }, remainingMs);
+
+    return () => clearTimeout(timer);
+  }, [dispatch, expiresAt, isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadData = async () => {
       try {
         const [userResponse, roleResponse] = await Promise.all([
@@ -34,12 +81,18 @@ function App() {
     };
 
     loadData();
-  }, [dispatch]);
+  }, [dispatch, isAuthenticated]);
 
   const handleLogin = async ({ email, password }) => {
     try {
       const response = await api.login({ email, password });
-      dispatch(loginSuccess(response.user));
+      dispatch(
+        loginSuccess({
+          user: response.user,
+          token: response.token,
+          expiresAt: response.expiresAt,
+        })
+      );
       return true;
     } catch (error) {
       console.error(error.message);
@@ -48,6 +101,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    api.clearSession();
     dispatch(logout());
   };
 
