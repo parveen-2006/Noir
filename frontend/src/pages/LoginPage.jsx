@@ -28,13 +28,13 @@ function LoginPage({ onLogin }) {
     setIsSubmitting(true);
     setError('');
 
-    const success = await onLogin(form);
+    const result = await onLogin(form);
     setIsSubmitting(false);
 
-    if (success) {
+    if (result.success) {
       navigate('/');
     } else {
-      setError('This user does not exist or the password is incorrect.');
+      setError(result.message || 'This user does not exist or the password is incorrect.');
     }
   };
 

@@ -4,6 +4,13 @@ const API_BASE_URL = 'http://localhost:5000/api';
 const AUTH_STORAGE_KEY = 'noir_auth_session';
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
+const toTimestamp = (value) => {
+  if (typeof value === 'number') return value;
+
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+};
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -26,7 +33,7 @@ const readStoredSession = () => {
     if (!sessionRaw) return null;
 
     const session = JSON.parse(sessionRaw);
-    const expiresAt = Number(session.expiresAt || 0);
+    const expiresAt = toTimestamp(session.expiresAt);
 
     if (!session.token || !expiresAt || expiresAt <= Date.now()) {
       localStorage.removeItem(AUTH_STORAGE_KEY);
@@ -36,7 +43,7 @@ const readStoredSession = () => {
 
     applyAuthToken(session.token);
     return session;
-  } catch (error) {
+  } catch {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     applyAuthToken(null);
     return null;
@@ -64,7 +71,10 @@ apiClient.interceptors.response.use(
 export const api = {
   login: async (payload) => {
     const response = await apiClient.post('/auth/login', payload);
-    const expiresAt = Date.now() + SESSION_TTL_MS;
+    // Use the expiry issued by the API. It is an ISO string today, while
+    // restored sessions use a numeric timestamp, so normalize it before
+    // persisting and comparing it.
+    const expiresAt = toTimestamp(response.expiresAt) || Date.now() + SESSION_TTL_MS;
     const session = {
       token: response.token,
       expiresAt,
@@ -72,7 +82,10 @@ export const api = {
     };
 
     saveStoredSession(session);
-    return response;
+    return {
+      ...response,
+      expiresAt,
+    };
   },
   getUsers: () => apiClient.get('/users'),
   createUser: (payload) => apiClient.post('/users', payload),

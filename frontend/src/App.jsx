@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
@@ -12,12 +12,20 @@ import { setUsers, addUser } from './store/userSlice';
 import { setRoles, addRole } from './store/roleSlice';
 import './styles.css';
 
+const toTimestamp = (value) => {
+  if (typeof value === 'number') return value;
+
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+};
+
 function App() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const expiresAt = useSelector((state) => state.auth.expiresAt);
   const users = useSelector((state) => state.users.list);
   const roles = useSelector((state) => state.roles.list);
+  const [appError, setAppError] = useState('');
 
   useEffect(() => {
     const storedSession = api.getStoredSession();
@@ -26,7 +34,7 @@ function App() {
       return;
     }
 
-    const remainingMs = Number(storedSession.expiresAt || 0) - Date.now();
+    const remainingMs = toTimestamp(storedSession.expiresAt) - Date.now();
 
     if (remainingMs <= 0) {
       api.clearSession();
@@ -48,7 +56,7 @@ function App() {
   useEffect(() => {
     if (!isAuthenticated || !expiresAt) return;
 
-    const remainingMs = Number(expiresAt) - Date.now();
+    const remainingMs = toTimestamp(expiresAt) - Date.now();
     if (remainingMs <= 0) {
       api.clearSession();
       dispatch(logout());
@@ -76,7 +84,9 @@ function App() {
         dispatch(setUsers(userResponse.users || []));
         dispatch(setRoles(roleResponse.roles || []));
       } catch (error) {
-        console.error('Failed to load app data:', error.message);
+        const message = `Unable to load users and roles: ${error.message}`;
+        console.error('[Noir] Data loading failed:', error);
+        setAppError(message);
       }
     };
 
@@ -93,10 +103,10 @@ function App() {
           expiresAt: response.expiresAt,
         })
       );
-      return true;
+      return { success: true };
     } catch (error) {
-      console.error(error.message);
-      return false;
+      console.error('[Noir] Login failed:', error);
+      return { success: false, message: error.message || 'Unable to sign in.' };
     }
   };
 
@@ -136,6 +146,12 @@ function App() {
       <Sidebar onLogout={handleLogout} />
 
       <main className="flex-1 p-4 md:p-8">
+        {appError && (
+          <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100" role="alert">
+            <span>{appError}</span>
+            <button type="button" onClick={() => setAppError('')} className="text-amber-200 hover:text-white" aria-label="Dismiss error">Dismiss</button>
+          </div>
+        )}
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/users" element={<UserPage onCreateUser={handleCreateUser} users={users} />} />

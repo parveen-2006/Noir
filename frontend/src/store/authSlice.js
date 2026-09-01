@@ -10,7 +10,9 @@ const getStoredSession = () => {
     if (!raw) return null;
 
     const session = JSON.parse(raw);
-    const expiryTime = Number(session.expiresAt || 0);
+    const expiryTime = typeof session.expiresAt === 'number'
+      ? session.expiresAt
+      : Date.parse(session.expiresAt);
 
     if (!session.token || !expiryTime || expiryTime <= Date.now()) {
       localStorage.removeItem('noir_auth_session');
@@ -18,7 +20,7 @@ const getStoredSession = () => {
     }
 
     return session;
-  } catch (error) {
+  } catch {
     localStorage.removeItem('noir_auth_session');
     return null;
   }
