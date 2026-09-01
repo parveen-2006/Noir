@@ -1,4 +1,27 @@
 import { useState } from 'react';
+import {
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 const emptyForm = {
   name: '',
@@ -38,111 +61,182 @@ function UserPage({ users = [], onCreateUser }) {
   };
 
   return (
-    <div className="page">
-      <header className="page-header">
+    <div className="mx-auto max-w-6xl">
+      <header className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <p className="eyebrow">People</p>
-          <h1>User</h1>
+          <Typography variant="overline" sx={{ color: '#a78bfa', letterSpacing: 2, display: 'block', mb: 1 }}>
+            People
+          </Typography>
+          <Typography variant="h3" sx={{ color: '#fff', fontWeight: 700 }}>
+            User
+          </Typography>
         </div>
-        <button className="primary-button" onClick={() => setIsOpen(true)}>
+        <Button
+          variant="contained"
+          onClick={() => setIsOpen(true)}
+          sx={{
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+            borderRadius: 2,
+            textTransform: 'none',
+            px: 2.5,
+            py: 1.25,
+            fontWeight: 600,
+          }}
+        >
           Add user
-        </button>
+        </Button>
       </header>
 
-      <section className="panel">
-        <div className="panel-header">
-          <h2>Users</h2>
-        </div>
+      <Card sx={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(148,163,184,0.12)', boxShadow: '0 16px 40px rgba(15,23,42,0.22)' }}>
+        <CardContent>
+          <Typography variant="h5" sx={{ color: '#fff', mb: 2, fontWeight: 600 }}>
+            Users
+          </Typography>
 
-        <div className="table-wrap">
           {users.length === 0 ? (
-            <p className="empty-state">No users created yet.</p>
+            <Typography sx={{ color: '#cbd5e1', py: 2 }}>No users created yet.</Typography>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Role</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={`${user.email}-${user.name}`}>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{user.role}</td>
-                    <td>
-                      <span className={`status ${user.status.toLowerCase()}`}>
-                        {user.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <TableContainer component={Paper} sx={{ background: 'transparent', boxShadow: 'none' }}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Name</TableCell>
+                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Email</TableCell>
+                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Role</TableCell>
+                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {users.map((user) => {
+                    const statusColor =
+                      user.status === 'Active'
+                        ? '#34d399'
+                        : user.status === 'Pending'
+                          ? '#fbbf24'
+                          : '#cbd5e1';
+
+                    return (
+                      <TableRow key={`${user.email}-${user.name}`} sx={{ '& td': { borderColor: 'rgba(148,163,184,0.15)' } }}>
+                        <TableCell sx={{ color: '#e2e8f0' }}>{user.name}</TableCell>
+                        <TableCell sx={{ color: '#e2e8f0' }}>{user.email}</TableCell>
+                        <TableCell sx={{ color: '#e2e8f0' }}>{user.role}</TableCell>
+                        <TableCell>
+                          <span
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              borderRadius: 999,
+                              padding: '6px 10px',
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              color: statusColor,
+                              background: statusColor + '22',
+                            }}
+                          >
+                            {user.status}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      {isOpen && (
-        <div className="modal-overlay" onClick={() => setIsOpen(false)}>
-          <div className="modal-card" onClick={(event) => event.stopPropagation()}>
-            <div className="panel-header">
-              <h2>Create user</h2>
-              <button className="close-button" onClick={() => setIsOpen(false)}>
-                ×
-              </button>
-            </div>
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: '#fff', background: '#0f172a' }}>Create user</DialogTitle>
+        <form onSubmit={handleSubmit}>
+          <DialogContent sx={{ background: '#0f172a', pt: 2 }}>
+            <Stack spacing={2}>
+              <TextField
+                label="Name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="name"
+                inputProps={{ autoComplete: 'name' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+              <TextField
+                label="Email"
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="email"
+                inputProps={{ autoComplete: 'email' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+              <TextField
+                label="Password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="new-password"
+                inputProps={{ autoComplete: 'new-password' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
 
-            <form className="user-form" onSubmit={handleSubmit}>
-              <label>
-                <span>Name</span>
-                <input name="name" value={form.name} onChange={handleChange} placeholder="John Doe" />
-              </label>
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: '#cbd5e1' }}>Role</InputLabel>
+                <Select
+                  name="role"
+                  value={form.role}
+                  label="Role"
+                  onChange={handleChange}
+                  sx={{ color: '#fff', background: '#111827', borderRadius: 2 }}
+                >
+                  <MenuItem value="Admin">Admin</MenuItem>
+                  <MenuItem value="Manager">Manager</MenuItem>
+                  <MenuItem value="Support">Support</MenuItem>
+                  <MenuItem value="Editor">Editor</MenuItem>
+                </Select>
+              </FormControl>
 
-              <label>
-                <span>Email</span>
-                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="john@noir.com" />
-              </label>
-
-              <label>
-                <span>Password</span>
-                <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Enter password" />
-              </label>
-
-              <label>
-                <span>Role</span>
-                <select name="role" value={form.role} onChange={handleChange}>
-                  <option>Admin</option>
-                  <option>Manager</option>
-                  <option>Support</option>
-                  <option>Editor</option>
-                </select>
-              </label>
-
-              <label>
-                <span>Status</span>
-                <select name="status" value={form.status} onChange={handleChange}>
-                  <option>Active</option>
-                  <option>Pending</option>
-                  <option>Inactive</option>
-                </select>
-              </label>
-
-              <div className="modal-actions">
-                <button type="button" className="secondary-button" onClick={() => setIsOpen(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="primary-button">
-                  Save user
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <FormControl fullWidth>
+                <InputLabel sx={{ color: '#cbd5e1' }}>Status</InputLabel>
+                <Select
+                  name="status"
+                  value={form.status}
+                  label="Status"
+                  onChange={handleChange}
+                  sx={{ color: '#fff', background: '#111827', borderRadius: 2 }}
+                >
+                  <MenuItem value="Active">Active</MenuItem>
+                  <MenuItem value="Pending">Pending</MenuItem>
+                  <MenuItem value="Inactive">Inactive</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ background: '#0f172a', px: 3, pb: 2 }}>
+            <Button onClick={() => setIsOpen(false)} sx={{ color: '#e2e8f0' }}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                borderRadius: 2,
+                textTransform: 'none',
+              }}
+            >
+              Save user
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 }

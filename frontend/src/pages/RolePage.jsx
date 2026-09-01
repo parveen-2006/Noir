@@ -1,4 +1,17 @@
 import { useState } from 'react';
+import {
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 
 const emptyForm = {
   name: '',
@@ -34,74 +47,141 @@ function RolePage({ roles = [], onCreateRole }) {
   };
 
   return (
-    <div className="page">
-      <header className="page-header">
+    <div className="mx-auto max-w-6xl">
+      <header className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <p className="eyebrow">Access control</p>
-          <h1>Role</h1>
+          <Typography variant="overline" sx={{ color: '#a78bfa', letterSpacing: 2, display: 'block', mb: 1 }}>
+            Access control
+          </Typography>
+          <Typography variant="h3" sx={{ color: '#fff', fontWeight: 700 }}>
+            Role
+          </Typography>
         </div>
-        <button className="primary-button" onClick={() => setIsOpen(true)}>
+        <Button
+          variant="contained"
+          onClick={() => setIsOpen(true)}
+          sx={{
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+            borderRadius: 2,
+            textTransform: 'none',
+            px: 2.5,
+            py: 1.25,
+            fontWeight: 600,
+          }}
+        >
           Create role
-        </button>
+        </Button>
       </header>
 
-      <section className="role-grid">
+      <Grid container spacing={2}>
         {roles.length === 0 ? (
-          <div className="panel empty-role-panel">
-            <p>No roles created yet.</p>
-          </div>
+          <Grid item xs={12}>
+            <Card sx={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(148,163,184,0.12)' }}>
+              <CardContent>
+                <Typography sx={{ color: '#cbd5e1' }}>No roles created yet.</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ) : (
           roles.map((role) => (
-            <article key={`${role.name}-${role.email || 'role'}`} className="role-card">
-              <div className="role-badge">{role.name}</div>
-              <p>{role.description}</p>
-              <div className="role-meta">
-                <span>{role.users} users</span>
-                <button>Manage</button>
-              </div>
-            </article>
+            <Grid item xs={12} md={6} xl={4} key={`${role.name}-${role.email || 'role'}`}>
+              <Card
+                sx={{
+                  background: 'rgba(15,23,42,0.8)',
+                  border: '1px solid rgba(148,163,184,0.12)',
+                  boxShadow: '0 16px 40px rgba(15,23,42,0.22)',
+                  height: '100%',
+                }}
+              >
+                <CardContent>
+                  <Typography
+                    variant="button"
+                    sx={{
+                      display: 'inline-block',
+                      background: 'rgba(139,92,246,0.12)',
+                      color: '#d8b4fe',
+                      borderRadius: 999,
+                      px: 1.5,
+                      py: 0.75,
+                      mb: 2,
+                    }}
+                  >
+                    {role.name}
+                  </Typography>
+                  <Typography sx={{ color: '#cbd5e1', mb: 2 }}>{role.description}</Typography>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Typography sx={{ color: '#93c5fd' }}>{role.users ?? 0} users</Typography>
+                    <Button size="small" sx={{ color: '#fff' }}>
+                      Manage
+                    </Button>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
           ))
         )}
-      </section>
+      </Grid>
 
-      {isOpen && (
-        <div className="modal-overlay" onClick={() => setIsOpen(false)}>
-          <div className="modal-card" onClick={(event) => event.stopPropagation()}>
-            <div className="panel-header">
-              <h2>Create role</h2>
-              <button className="close-button" onClick={() => setIsOpen(false)}>
-                ×
-              </button>
-            </div>
-
-            <form className="user-form" onSubmit={handleSubmit}>
-              <label>
-                <span>Name</span>
-                <input name="name" value={form.name} onChange={handleChange} placeholder="Role name" />
-              </label>
-
-              <label>
-                <span>Email</span>
-                <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="role@noir.com" />
-              </label>
-
-              <label>
-                <span>Password</span>
-                <input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Enter password" />
-              </label>
-
-              <div className="modal-actions">
-                <button type="button" className="secondary-button" onClick={() => setIsOpen(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="primary-button">
-                  Save role
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Dialog open={isOpen} onClose={() => setIsOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: '#fff', background: '#0f172a' }}>Create role</DialogTitle>
+        <form onSubmit={handleSubmit}>
+          <DialogContent sx={{ background: '#0f172a', pt: 2 }}>
+            <Stack spacing={2}>
+              <TextField
+                label="Name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="name"
+                inputProps={{ autoComplete: 'name' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+              <TextField
+                label="Email"
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="email"
+                inputProps={{ autoComplete: 'email' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+              <TextField
+                label="Password"
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                fullWidth
+                autoComplete="new-password"
+                inputProps={{ autoComplete: 'new-password' }}
+                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
+                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ background: '#0f172a', px: 3, pb: 2 }}>
+            <Button onClick={() => setIsOpen(false)} sx={{ color: '#e2e8f0' }}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              sx={{
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                borderRadius: 2,
+                textTransform: 'none',
+              }}
+            >
+              Save role
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 }
