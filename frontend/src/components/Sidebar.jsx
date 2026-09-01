@@ -7,7 +7,7 @@ const items = [
   { to: '/roles', label: 'Role', icon: ShieldCheck },
 ];
 
-function Sidebar({ onLogout }) {
+function Sidebar({ onLogout, can }) {
   return (
     <aside className="w-64 shrink-0 border-r border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-8 flex items-center gap-3 px-2">
@@ -22,7 +22,7 @@ function Sidebar({ onLogout }) {
 
       <nav className="flex flex-1 flex-col justify-between gap-2">
         <div className="space-y-2">
-          {items.map(({ to, label, icon: Icon }) => (
+          {items.filter(({ to }) => can(to === '/' ? 'dashboard.view' : `${to.slice(1)}.view`)).map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}

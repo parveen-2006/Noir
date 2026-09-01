@@ -31,8 +31,9 @@ const emptyForm = {
   status: 'Active',
 };
 
-function UserPage({ users = [], onCreateUser }) {
+function UserPage({ users = [], roles = [], onCreateUser, onUpdateUser, can }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
   const handleChange = (event) => {
@@ -43,21 +44,50 @@ function UserPage({ users = [], onCreateUser }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.name || !form.email || !form.password) return;
+    if (!form.name || !form.email || (!editingUser && !form.password)) return;
 
-    const newUser = {
+    const userDetails = {
       name: form.name,
       email: form.email,
-      password: form.password,
       role: form.role,
       status: form.status,
     };
 
-    const success = await onCreateUser(newUser);
+    if (form.password) userDetails.password = form.password;
+
+    const success = editingUser
+      ? await onUpdateUser(editingUser.id, userDetails)
+      : await onCreateUser(userDetails);
+
     if (success) {
       setForm(emptyForm);
+      setEditingUser(null);
       setIsOpen(false);
     }
+  };
+
+  const openCreateDialog = () => {
+    setEditingUser(null);
+    setForm({ ...emptyForm, role: roles[0]?.name || '' });
+    setIsOpen(true);
+  };
+
+  const openEditDialog = (user) => {
+    setEditingUser(user);
+    setForm({
+      name: user.name,
+      email: user.email,
+      password: '',
+      role: user.role || 'Manager',
+      status: user.status === 'Inactive' ? 'Inactive' : 'Active',
+    });
+    setIsOpen(true);
+  };
+
+  const closeDialog = () => {
+    setIsOpen(false);
+    setEditingUser(null);
+    setForm(emptyForm);
   };
 
   return (
@@ -71,9 +101,9 @@ function UserPage({ users = [], onCreateUser }) {
             User
           </Typography>
         </div>
-        <Button
+        {can('users.create') && <Button
           variant="contained"
-          onClick={() => setIsOpen(true)}
+          onClick={openCreateDialog}
           sx={{
             background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
             borderRadius: 2,
@@ -84,7 +114,7 @@ function UserPage({ users = [], onCreateUser }) {
           }}
         >
           Add user
-        </Button>
+        </Button>}
       </header>
 
       <Card sx={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
@@ -104,6 +134,7 @@ function UserPage({ users = [], onCreateUser }) {
                     <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Email</TableCell>
                     <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Role</TableCell>
                     <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Status</TableCell>
+                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -136,6 +167,7 @@ function UserPage({ users = [], onCreateUser }) {
                             {user.status}
                           </span>
                         </TableCell>
+                        <TableCell>{can('users.update') && <Button size="small" onClick={() => openEditDialog(user)} sx={{ color: '#6d28d9', fontWeight: 700, textTransform: 'none' }}>Edit</Button>}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -146,8 +178,8 @@ function UserPage({ users = [], onCreateUser }) {
         </CardContent>
       </Card>
 
-      <Dialog open={isOpen} onClose={() => setIsOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ color: '#0f172a', background: '#fff' }}>Create user</DialogTitle>
+      <Dialog open={isOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: '#0f172a', background: '#fff' }}>{editingUser ? 'Edit user' : 'Create user'}</DialogTitle>
         <form onSubmit={handleSubmit}>
           <DialogContent sx={{ background: '#fff', pt: 2 }}>
             <Stack spacing={2}>
@@ -175,7 +207,7 @@ function UserPage({ users = [], onCreateUser }) {
                 InputProps={{ sx: { color: '#0f172a', background: '#fff', borderRadius: 2 } }}
               />
               <TextField
-                label="Password"
+                label={editingUser ? 'New password (optional)' : 'Password'}
                 type="password"
                 name="password"
                 value={form.password}
@@ -196,10 +228,7 @@ function UserPage({ users = [], onCreateUser }) {
                   onChange={handleChange}
                   sx={{ color: '#0f172a', background: '#fff', borderRadius: 2 }}
                 >
-                  <MenuItem value="Admin">Admin</MenuItem>
-                  <MenuItem value="Manager">Manager</MenuItem>
-                  <MenuItem value="Support">Support</MenuItem>
-                  <MenuItem value="Editor">Editor</MenuItem>
+                  {roles.map((role) => <MenuItem key={role.id} value={role.name}>{role.name}</MenuItem>)}
                 </Select>
               </FormControl>
 
@@ -213,14 +242,13 @@ function UserPage({ users = [], onCreateUser }) {
                   sx={{ color: '#0f172a', background: '#fff', borderRadius: 2 }}
                 >
                   <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Pending">Pending</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
                 </Select>
               </FormControl>
             </Stack>
           </DialogContent>
           <DialogActions sx={{ background: '#fff', px: 3, pb: 2 }}>
-            <Button onClick={() => setIsOpen(false)} sx={{ color: '#475569' }}>
+            <Button onClick={closeDialog} sx={{ color: '#475569' }}>
               Cancel
             </Button>
             <Button
@@ -232,7 +260,7 @@ function UserPage({ users = [], onCreateUser }) {
                 textTransform: 'none',
               }}
             >
-              Save user
+              {editingUser ? 'Save changes' : 'Save user'}
             </Button>
           </DialogActions>
         </form>

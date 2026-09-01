@@ -4,7 +4,7 @@ export const userStore = [
     name: 'System Admin',
     email: 'admin@noir.com',
     password: 'admin123',
-    role: 'Admin',
+    role: 'Administrator',
     status: 'Active',
   },
 ];
@@ -17,6 +17,10 @@ export const roleStore = [
     password: 'admin123',
     description: 'Full access and system configuration.',
     users: 1,
+    permissions: [
+      'dashboard.view', 'users.view', 'users.create', 'users.update',
+      'roles.view', 'roles.create', 'roles.update', 'roles.delete',
+    ],
   },
 ];
 
@@ -26,6 +30,7 @@ export const sanitizeUser = (user) => ({
   email: user.email,
   role: user.role,
   status: user.status,
+  permissions: roleStore.find((role) => role.name === user.role)?.permissions || [],
 });
 
 export const sanitizeUsers = (users) => users.map(sanitizeUser);

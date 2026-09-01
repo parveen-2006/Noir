@@ -1,4 +1,4 @@
-import { sanitizeUser, sanitizeUsers, userStore } from '../data/store.js';
+import { roleStore, sanitizeUser, sanitizeUsers, userStore } from '../data/store.js';
 
 export const getUsers = (req, res) => {
   return res.status(200).json({ users: sanitizeUsers(userStore) });
@@ -43,6 +43,22 @@ export const updateUser = (req, res) => {
   const index = userStore.findIndex((user) => user.id === id);
   if (index === -1) {
     return res.status(404).json({ message: 'User not found.' });
+  }
+
+  if (role && !roleStore.some((item) => item.name === role)) {
+    return res.status(400).json({ message: 'Select a valid role.' });
+  }
+
+  const duplicateEmail = userStore.some(
+    (user) => user.id !== id && user.email.toLowerCase() === String(email || '').toLowerCase(),
+  );
+
+  if (email && duplicateEmail) {
+    return res.status(409).json({ message: 'Another user already exists with this email.' });
+  }
+
+  if (role && !roleStore.some((item) => item.name === role)) {
+    return res.status(400).json({ message: 'Select a valid role.' });
   }
 
   userStore[index] = {
