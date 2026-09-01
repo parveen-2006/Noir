@@ -20,17 +20,6 @@ const toTimestamp = (value) => {
   return Number.isFinite(timestamp) ? timestamp : 0;
 };
 
-const ALL_UI_PERMISSIONS = [
-  'dashboard.view',
-  'users.view',
-  'users.create',
-  'users.update',
-  'roles.view',
-  'roles.create',
-  'roles.update',
-  'roles.delete',
-];
-
 function App() {
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -39,10 +28,7 @@ function App() {
   const roles = useSelector((state) => state.roles.list);
   const currentUser = useSelector((state) => state.auth.user);
   const [appError, setAppError] = useState('');
-  const isSystemAdmin = currentUser?.email === 'admin@noir.com';
-  const permissions = isSystemAdmin
-    ? ALL_UI_PERMISSIONS
-    : roles.find((role) => role.name === currentUser?.role)?.permissions || currentUser?.permissions || [];
+  const permissions = roles.find((role) => role.name === currentUser?.role)?.permissions || currentUser?.permissions || [];
   const can = (permission) => permissions.includes(permission);
 
   useEffect(() => {
