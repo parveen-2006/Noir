@@ -30,7 +30,7 @@ function DashboardPage() {
           <Typography variant="overline" sx={{ color: '#a78bfa', letterSpacing: 2, display: 'block', mb: 1 }}>
             Overview
           </Typography>
-          <Typography variant="h3" sx={{ color: '#fff', fontWeight: 700 }}>
+          <Typography variant="h3" sx={{ color: '#0f172a', fontWeight: 700 }}>
             Dashboard
           </Typography>
         </div>
@@ -43,13 +43,11 @@ function DashboardPage() {
             sx={{
               flex: '1 1 220px',
               minWidth: 180,
-              background: 'rgba(15,23,42,0.8)',
-              border: '1px solid rgba(148,163,184,0.12)',
-              boxShadow: '0 16px 40px rgba(15,23,42,0.22)',
+              background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
             }}
           >
             <CardContent>
-              <Typography variant="body2" sx={{ color: '#cbd5e1', mb: 1 }}>
+              <Typography variant="body2" sx={{ color: '#475569', mb: 1 }}>
                 {item.label}
               </Typography>
               <Typography variant="h4" sx={{ color: item.tone, fontWeight: 700 }}>
@@ -62,13 +60,11 @@ function DashboardPage() {
 
       <Card
         sx={{
-          background: 'rgba(15,23,42,0.8)',
-          border: '1px solid rgba(148,163,184,0.12)',
-          boxShadow: '0 16px 40px rgba(15,23,42,0.22)',
+          background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
         }}
       >
         <CardContent>
-          <Typography variant="h5" sx={{ color: '#fff', mb: 2, fontWeight: 600 }}>
+          <Typography variant="h5" sx={{ color: '#0f172a', mb: 2, fontWeight: 600 }}>
             Recent activity
           </Typography>
 
@@ -77,7 +73,7 @@ function DashboardPage() {
               <ListItem
                 key={item}
                 sx={{
-                  background: 'rgba(30,41,59,0.7)',
+                  background: '#f8fafc',
                   borderRadius: 2,
                   mb: 1,
                   px: 2,
@@ -88,7 +84,7 @@ function DashboardPage() {
                   primary={item}
                   sx={{
                     '& .MuiListItemText-primary': {
-                      color: '#dbeafe',
+                      color: '#334155',
                     },
                   }}
                 />

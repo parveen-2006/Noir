@@ -53,7 +53,7 @@ function RolePage({ roles = [], onCreateRole }) {
           <Typography variant="overline" sx={{ color: '#a78bfa', letterSpacing: 2, display: 'block', mb: 1 }}>
             Access control
           </Typography>
-          <Typography variant="h3" sx={{ color: '#fff', fontWeight: 700 }}>
+          <Typography variant="h3" sx={{ color: '#0f172a', fontWeight: 700 }}>
             Role
           </Typography>
         </div>
@@ -76,9 +76,9 @@ function RolePage({ roles = [], onCreateRole }) {
       <Grid container spacing={2}>
         {roles.length === 0 ? (
           <Grid item xs={12}>
-            <Card sx={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(148,163,184,0.12)' }}>
+            <Card sx={{ background: '#fff', border: '1px solid #e2e8f0' }}>
               <CardContent>
-                <Typography sx={{ color: '#cbd5e1' }}>No roles created yet.</Typography>
+                <Typography sx={{ color: '#475569' }}>No roles created yet.</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -87,9 +87,7 @@ function RolePage({ roles = [], onCreateRole }) {
             <Grid item xs={12} md={6} xl={4} key={`${role.name}-${role.email || 'role'}`}>
               <Card
                 sx={{
-                  background: 'rgba(15,23,42,0.8)',
-                  border: '1px solid rgba(148,163,184,0.12)',
-                  boxShadow: '0 16px 40px rgba(15,23,42,0.22)',
+                  background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
                   height: '100%',
                 }}
               >
@@ -108,10 +106,10 @@ function RolePage({ roles = [], onCreateRole }) {
                   >
                     {role.name}
                   </Typography>
-                  <Typography sx={{ color: '#cbd5e1', mb: 2 }}>{role.description}</Typography>
+                  <Typography sx={{ color: '#475569', mb: 2 }}>{role.description}</Typography>
                   <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography sx={{ color: '#93c5fd' }}>{role.users ?? 0} users</Typography>
-                    <Button size="small" sx={{ color: '#fff' }}>
+                    <Button size="small" sx={{ color: '#6d28d9' }}>
                       Manage
                     </Button>
                   </Stack>
@@ -123,9 +121,9 @@ function RolePage({ roles = [], onCreateRole }) {
       </Grid>
 
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ color: '#fff', background: '#0f172a' }}>Create role</DialogTitle>
+        <DialogTitle sx={{ color: '#0f172a', background: '#fff' }}>Create role</DialogTitle>
         <form onSubmit={handleSubmit}>
-          <DialogContent sx={{ background: '#0f172a', pt: 2 }}>
+          <DialogContent sx={{ background: '#fff', pt: 2 }}>
             <Stack spacing={2}>
               <TextField
                 label="Name"
@@ -135,8 +133,8 @@ function RolePage({ roles = [], onCreateRole }) {
                 fullWidth
                 autoComplete="name"
                 inputProps={{ autoComplete: 'name' }}
-                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
-                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+                InputLabelProps={{ sx: { color: '#475569' } }}
+                InputProps={{ sx: { color: '#0f172a', background: '#fff', borderRadius: 2 } }}
               />
               <TextField
                 label="Email"
@@ -147,8 +145,8 @@ function RolePage({ roles = [], onCreateRole }) {
                 fullWidth
                 autoComplete="email"
                 inputProps={{ autoComplete: 'email' }}
-                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
-                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+                InputLabelProps={{ sx: { color: '#475569' } }}
+                InputProps={{ sx: { color: '#0f172a', background: '#fff', borderRadius: 2 } }}
               />
               <TextField
                 label="Password"
@@ -159,13 +157,13 @@ function RolePage({ roles = [], onCreateRole }) {
                 fullWidth
                 autoComplete="new-password"
                 inputProps={{ autoComplete: 'new-password' }}
-                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
-                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+                InputLabelProps={{ sx: { color: '#475569' } }}
+                InputProps={{ sx: { color: '#0f172a', background: '#fff', borderRadius: 2 } }}
               />
             </Stack>
           </DialogContent>
-          <DialogActions sx={{ background: '#0f172a', px: 3, pb: 2 }}>
-            <Button onClick={() => setIsOpen(false)} sx={{ color: '#e2e8f0' }}>
+          <DialogActions sx={{ background: '#fff', px: 3, pb: 2 }}>
+            <Button onClick={() => setIsOpen(false)} sx={{ color: '#475569' }}>
               Cancel
             </Button>
             <Button

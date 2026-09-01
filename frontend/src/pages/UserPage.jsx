@@ -67,7 +67,7 @@ function UserPage({ users = [], onCreateUser }) {
           <Typography variant="overline" sx={{ color: '#a78bfa', letterSpacing: 2, display: 'block', mb: 1 }}>
             People
           </Typography>
-          <Typography variant="h3" sx={{ color: '#fff', fontWeight: 700 }}>
+          <Typography variant="h3" sx={{ color: '#0f172a', fontWeight: 700 }}>
             User
           </Typography>
         </div>
@@ -87,14 +87,14 @@ function UserPage({ users = [], onCreateUser }) {
         </Button>
       </header>
 
-      <Card sx={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(148,163,184,0.12)', boxShadow: '0 16px 40px rgba(15,23,42,0.22)' }}>
+      <Card sx={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
         <CardContent>
-          <Typography variant="h5" sx={{ color: '#fff', mb: 2, fontWeight: 600 }}>
+          <Typography variant="h5" sx={{ color: '#0f172a', mb: 2, fontWeight: 600 }}>
             Users
           </Typography>
 
           {users.length === 0 ? (
-            <Typography sx={{ color: '#cbd5e1', py: 2 }}>No users created yet.</Typography>
+            <Typography sx={{ color: '#475569', py: 2 }}>No users created yet.</Typography>
           ) : (
             <TableContainer component={Paper} sx={{ background: 'transparent', boxShadow: 'none' }}>
               <Table>
@@ -117,9 +117,9 @@ function UserPage({ users = [], onCreateUser }) {
 
                     return (
                       <TableRow key={`${user.email}-${user.name}`} sx={{ '& td': { borderColor: 'rgba(148,163,184,0.15)' } }}>
-                        <TableCell sx={{ color: '#e2e8f0' }}>{user.name}</TableCell>
-                        <TableCell sx={{ color: '#e2e8f0' }}>{user.email}</TableCell>
-                        <TableCell sx={{ color: '#e2e8f0' }}>{user.role}</TableCell>
+                        <TableCell sx={{ color: '#334155' }}>{user.name}</TableCell>
+                        <TableCell sx={{ color: '#334155' }}>{user.email}</TableCell>
+                        <TableCell sx={{ color: '#334155' }}>{user.role}</TableCell>
                         <TableCell>
                           <span
                             style={{
@@ -147,9 +147,9 @@ function UserPage({ users = [], onCreateUser }) {
       </Card>
 
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ color: '#fff', background: '#0f172a' }}>Create user</DialogTitle>
+        <DialogTitle sx={{ color: '#0f172a', background: '#fff' }}>Create user</DialogTitle>
         <form onSubmit={handleSubmit}>
-          <DialogContent sx={{ background: '#0f172a', pt: 2 }}>
+          <DialogContent sx={{ background: '#fff', pt: 2 }}>
             <Stack spacing={2}>
               <TextField
                 label="Name"
@@ -159,8 +159,8 @@ function UserPage({ users = [], onCreateUser }) {
                 fullWidth
                 autoComplete="name"
                 inputProps={{ autoComplete: 'name' }}
-                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
-                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+                InputLabelProps={{ sx: { color: '#475569' } }}
+                InputProps={{ sx: { color: '#0f172a', background: '#fff', borderRadius: 2 } }}
               />
               <TextField
                 label="Email"
@@ -171,8 +171,8 @@ function UserPage({ users = [], onCreateUser }) {
                 fullWidth
                 autoComplete="email"
                 inputProps={{ autoComplete: 'email' }}
-                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
-                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+                InputLabelProps={{ sx: { color: '#475569' } }}
+                InputProps={{ sx: { color: '#0f172a', background: '#fff', borderRadius: 2 } }}
               />
               <TextField
                 label="Password"
@@ -183,18 +183,18 @@ function UserPage({ users = [], onCreateUser }) {
                 fullWidth
                 autoComplete="new-password"
                 inputProps={{ autoComplete: 'new-password' }}
-                InputLabelProps={{ sx: { color: '#cbd5e1' } }}
-                InputProps={{ sx: { color: '#fff', background: '#111827', borderRadius: 2 } }}
+                InputLabelProps={{ sx: { color: '#475569' } }}
+                InputProps={{ sx: { color: '#0f172a', background: '#fff', borderRadius: 2 } }}
               />
 
               <FormControl fullWidth>
-                <InputLabel sx={{ color: '#cbd5e1' }}>Role</InputLabel>
+                <InputLabel sx={{ color: '#475569' }}>Role</InputLabel>
                 <Select
                   name="role"
                   value={form.role}
                   label="Role"
                   onChange={handleChange}
-                  sx={{ color: '#fff', background: '#111827', borderRadius: 2 }}
+                  sx={{ color: '#0f172a', background: '#fff', borderRadius: 2 }}
                 >
                   <MenuItem value="Admin">Admin</MenuItem>
                   <MenuItem value="Manager">Manager</MenuItem>
@@ -204,13 +204,13 @@ function UserPage({ users = [], onCreateUser }) {
               </FormControl>
 
               <FormControl fullWidth>
-                <InputLabel sx={{ color: '#cbd5e1' }}>Status</InputLabel>
+                <InputLabel sx={{ color: '#475569' }}>Status</InputLabel>
                 <Select
                   name="status"
                   value={form.status}
                   label="Status"
                   onChange={handleChange}
-                  sx={{ color: '#fff', background: '#111827', borderRadius: 2 }}
+                  sx={{ color: '#0f172a', background: '#fff', borderRadius: 2 }}
                 >
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Pending">Pending</MenuItem>
@@ -219,8 +219,8 @@ function UserPage({ users = [], onCreateUser }) {
               </FormControl>
             </Stack>
           </DialogContent>
-          <DialogActions sx={{ background: '#0f172a', px: 3, pb: 2 }}>
-            <Button onClick={() => setIsOpen(false)} sx={{ color: '#e2e8f0' }}>
+          <DialogActions sx={{ background: '#fff', px: 3, pb: 2 }}>
+            <Button onClick={() => setIsOpen(false)} sx={{ color: '#475569' }}>
               Cancel
             </Button>
             <Button

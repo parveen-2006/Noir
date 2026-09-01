@@ -142,14 +142,14 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
       <Sidebar onLogout={handleLogout} />
 
       <main className="flex-1 p-4 md:p-8">
         {appError && (
           <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100" role="alert">
             <span>{appError}</span>
-            <button type="button" onClick={() => setAppError('')} className="text-amber-200 hover:text-white" aria-label="Dismiss error">Dismiss</button>
+            <button type="button" onClick={() => setAppError('')} className="text-amber-700 hover:text-amber-950" aria-label="Dismiss error">Dismiss</button>
           </div>
         )}
         <Routes>
