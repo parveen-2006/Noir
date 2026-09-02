@@ -113,10 +113,13 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
           sx={{
             backgroundColor: '#2563eb',
             color: '#fff',
+            width: 42,
+            height: 42,
+            borderRadius: 2,
             '&:hover': { backgroundColor: '#1d4ed8' },
           }}
         >
-          <Plus size={22} strokeWidth={2.5} />
+          <Plus size={24} strokeWidth={2.5} />
         </IconButton>}
       </header>
 

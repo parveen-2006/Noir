@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, IconButton, Stack, TextField, Tooltip, Typography } from '@mui/material';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import DataTable from '../components/DataTable';
 
 const permissionModules = [
@@ -30,7 +30,21 @@ function RolePage({ roles = [], users = [], onCreateRole, onUpdateRole, onDelete
   return <div className="mx-auto max-w-6xl">
     <header className="mb-6 flex items-center justify-between gap-4">
       <div><Typography variant="overline" sx={{ color: '#8b5cf6', letterSpacing: 2, display: 'block', mb: 1 }}>Access control</Typography><Typography variant="h3" sx={{ color: '#0f172a', fontWeight: 700 }}>Roles</Typography></div>
-      {can('roles.create') && <Button variant="contained" onClick={openCreate} sx={{ background: 'linear-gradient(135deg, #8b5cf6, #ec4899)', borderRadius: 2, textTransform: 'none', px: 2.5, py: 1.25, fontWeight: 600 }}>Create role</Button>}
+      {can('roles.create') && <IconButton
+        onClick={openCreate}
+        aria-label="Add role"
+        title="Add role"
+        sx={{
+          backgroundColor: '#2563eb',
+          color: '#fff',
+          width: 42,
+          height: 42,
+          borderRadius: 2,
+          '&:hover': { backgroundColor: '#1d4ed8' },
+        }}
+      >
+        <Plus size={28} strokeWidth={2.5} />
+      </IconButton>}
     </header>
 
     <DataTable
