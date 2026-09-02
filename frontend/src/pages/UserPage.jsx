@@ -130,10 +130,6 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
 
       <Card sx={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
         <CardContent>
-          <Typography variant="h5" sx={{ color: '#0f172a', mb: 2, fontWeight: 600 }}>
-            Users
-          </Typography>
-
           {users.length === 0 ? (
             <Typography sx={{ color: '#475569', py: 2 }}>No users created yet.</Typography>
           ) : (
