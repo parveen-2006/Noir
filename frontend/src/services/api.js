@@ -90,6 +90,7 @@ export const api = {
   getUsers: (params) => apiClient.get('/users', { params }),
   createUser: (payload) => apiClient.post('/users', payload),
   updateUser: (id, payload) => apiClient.put(`/users/${id}`, payload),
+  deleteUser: (id) => apiClient.delete(`/users/${id}`),
   getRoles: () => apiClient.get('/roles'),
   createRole: (payload) => apiClient.post('/roles', payload),
   updateRole: (id, payload) => apiClient.put(`/roles/${id}`, payload),

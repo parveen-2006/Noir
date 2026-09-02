@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   FormControl,
   IconButton,
@@ -22,9 +23,10 @@ import {
   TableHead,
   TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
-import { Plus } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 
 const emptyForm = {
   name: '',
@@ -34,9 +36,10 @@ const emptyForm = {
   status: 'Active',
 };
 
-function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUser, onUpdateUser, can }) {
+function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUser, onUpdateUser, onDeleteUser, can }) {
   const [isOpen, setIsOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
   const handleChange = (event) => {
@@ -93,6 +96,13 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
     setForm(emptyForm);
   };
 
+  const confirmDelete = async () => {
+    if (!deletingUser) return;
+
+    const success = await onDeleteUser(deletingUser.id);
+    if (success) setDeletingUser(null);
+  };
+
   return (
     <div className="mx-auto max-w-6xl">
       <header className="mb-6 flex items-center justify-between gap-4">
@@ -131,6 +141,7 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
               <Table>
                 <TableHead>
                   <TableRow>
+                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>S. No.</TableCell>
                     <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Name</TableCell>
                     <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Email</TableCell>
                     <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Role</TableCell>
@@ -139,7 +150,7 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {users.map((user) => {
+                  {users.map((user, index) => {
                     const statusColor =
                       user.status === 'Active'
                         ? '#34d399'
@@ -149,6 +160,7 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
 
                     return (
                       <TableRow key={`${user.email}-${user.name}`} sx={{ '& td': { borderColor: 'rgba(148,163,184,0.15)' } }}>
+                        <TableCell sx={{ color: '#334155' }}>{((pagination?.page || 1) - 1) * (pagination?.limit || users.length) + index + 1}</TableCell>
                         <TableCell sx={{ color: '#334155' }}>{user.name}</TableCell>
                         <TableCell sx={{ color: '#334155' }}>{user.email}</TableCell>
                         <TableCell sx={{ color: '#334155' }}>{user.role}</TableCell>
@@ -168,7 +180,10 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
                             {user.status}
                           </span>
                         </TableCell>
-                        <TableCell>{can('users.update') && <Button size="small" onClick={() => openEditDialog(user)} sx={{ color: '#6d28d9', fontWeight: 700, textTransform: 'none' }}>Edit</Button>}</TableCell>
+                        <TableCell><Stack direction="row" spacing={0.5}>
+                          {can('users.update') && <Tooltip title="Edit user"><IconButton aria-label={`Edit ${user.name}`} size="small" onClick={() => openEditDialog(user)} sx={{ color: '#6d28d9' }}><Pencil size={18} /></IconButton></Tooltip>}
+                          {can('users.delete') && <Tooltip title="Delete user"><IconButton aria-label={`Delete ${user.name}`} size="small" onClick={() => setDeletingUser(user)} sx={{ color: '#dc2626' }}><Trash2 size={18} /></IconButton></Tooltip>}
+                        </Stack></TableCell>
                       </TableRow>
                     );
                   })}
@@ -277,6 +292,17 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      <Dialog open={Boolean(deletingUser)} onClose={() => setDeletingUser(null)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ color: '#0f172a' }}>Delete user?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to delete {deletingUser?.name}? This action cannot be undone.</DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setDeletingUser(null)} sx={{ textTransform: 'none' }}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete} sx={{ textTransform: 'none' }}>Delete</Button>
+        </DialogActions>
       </Dialog>
     </div>
   );

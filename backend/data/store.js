@@ -18,7 +18,7 @@ export const roleStore = [
     description: 'Full access and system configuration.',
     users: 1,
     permissions: [
-      'dashboard.view', 'users.view', 'users.create', 'users.update',
+      'dashboard.view', 'users.view', 'users.create', 'users.update', 'users.delete',
       'roles.view', 'roles.create', 'roles.update', 'roles.delete',
     ],
   },

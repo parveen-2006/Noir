@@ -4,7 +4,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 
 const permissionModules = [
   { name: 'Dashboard', permissions: [['dashboard.view', 'View dashboard']] },
-  { name: 'User', permissions: [['users.view', 'View users'], ['users.create', 'Create users'], ['users.update', 'Edit users']] },
+  { name: 'User', permissions: [['users.view', 'View users'], ['users.create', 'Create users'], ['users.update', 'Edit users'], ['users.delete', 'Delete users']] },
   { name: 'Role', permissions: [['roles.view', 'View roles'], ['roles.create', 'Create roles'], ['roles.update', 'Edit roles'], ['roles.delete', 'Delete roles']] },
 ];
 const emptyForm = { name: '', description: '', permissions: [] };

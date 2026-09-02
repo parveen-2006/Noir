@@ -10,7 +10,7 @@ import RolePage from './pages/RolePage';
 import AccessDenied from './components/AccessDenied';
 import { api } from './services/api';
 import { loginSuccess, logout } from './store/authSlice';
-import { setUsers, addUser, updateUser } from './store/userSlice';
+import { setUsers, addUser, updateUser, removeUser } from './store/userSlice';
 import { setRoles, addRole, updateRole, removeRole } from './store/roleSlice';
 import './styles.css';
 
@@ -152,6 +152,18 @@ function App() {
     }
   };
 
+  const handleDeleteUser = async (id) => {
+    try {
+      await api.deleteUser(id);
+      dispatch(removeUser(id));
+      setUserRefreshKey((current) => current + 1);
+      return true;
+    } catch (error) {
+      setAppError(`Unable to delete user: ${error.message}`);
+      return false;
+    }
+  };
+
   const handleCreateRole = async (newRole) => {
     try {
       const response = await api.createRole(newRole);
@@ -198,7 +210,7 @@ function App() {
         onExpand={() => setIsSidebarCollapsed(false)}
       />
 
-      <main className="flex-1">
+      <main className={`${isSidebarCollapsed ? 'ml-20' : 'ml-64'} min-w-0 flex-1 transition-[margin-left] duration-300 ease-in-out`}>
         <Navbar user={currentUser} onToggleSidebar={() => setIsSidebarCollapsed((collapsed) => !collapsed)} />
         <div className="p-4 md:p-8">
           {appError && (
@@ -209,7 +221,7 @@ function App() {
           )}
           <Routes>
             <Route path="/" element={can('dashboard.view') ? <DashboardPage /> : <AccessDenied />} />
-            <Route path="/users" element={can('users.view') ? <UserPage onCreateUser={handleCreateUser} onUpdateUser={handleUpdateUser} users={users} roles={roles} pagination={userPagination} onPageChange={setUserPage} can={can} /> : <AccessDenied />} />
+            <Route path="/users" element={can('users.view') ? <UserPage onCreateUser={handleCreateUser} onUpdateUser={handleUpdateUser} onDeleteUser={handleDeleteUser} users={users} roles={roles} pagination={userPagination} onPageChange={setUserPage} can={can} /> : <AccessDenied />} />
             <Route path="/roles" element={can('roles.view') ? <RolePage roles={roles} users={users} onCreateRole={handleCreateRole} onUpdateRole={handleUpdateRole} onDeleteRole={handleDeleteRole} can={can} /> : <AccessDenied />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
