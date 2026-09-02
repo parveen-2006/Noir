@@ -194,7 +194,7 @@ function App() {
         <Routes>
           <Route path="/" element={can('dashboard.view') ? <DashboardPage /> : <AccessDenied />} />
           <Route path="/users" element={can('users.view') ? <UserPage onCreateUser={handleCreateUser} onUpdateUser={handleUpdateUser} users={users} roles={roles} can={can} /> : <AccessDenied />} />
-          <Route path="/roles" element={can('roles.view') ? <RolePage roles={roles} onCreateRole={handleCreateRole} onUpdateRole={handleUpdateRole} onDeleteRole={handleDeleteRole} can={can} /> : <AccessDenied />} />
+          <Route path="/roles" element={can('roles.view') ? <RolePage roles={roles} users={users} onCreateRole={handleCreateRole} onUpdateRole={handleUpdateRole} onDeleteRole={handleDeleteRole} can={can} /> : <AccessDenied />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

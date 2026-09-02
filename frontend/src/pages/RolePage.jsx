@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, CardContent, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, Stack, TextField, Typography } from '@mui/material';
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 
 const permissionModules = [
   { name: 'Dashboard', permissions: [['dashboard.view', 'View dashboard']] },
@@ -8,30 +8,55 @@ const permissionModules = [
 ];
 const emptyForm = { name: '', description: '', permissions: [] };
 
-function RolePage({ roles = [], onCreateRole, onUpdateRole, onDeleteRole, can }) {
+function RolePage({ roles = [], users = [], onCreateRole, onUpdateRole, onDeleteRole, can }) {
   const [isOpen, setIsOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
+  const [roleToDelete, setRoleToDelete] = useState(null);
   const [form, setForm] = useState(emptyForm);
+
   const openCreate = () => { setEditingRole(null); setForm(emptyForm); setIsOpen(true); };
   const openEdit = (role) => { setEditingRole(role); setForm({ name: role.name, description: role.description || '', permissions: role.permissions || [] }); setIsOpen(true); };
   const close = () => { setIsOpen(false); setEditingRole(null); setForm(emptyForm); };
   const togglePermission = (permission) => setForm((current) => ({ ...current, permissions: current.permissions.includes(permission) ? current.permissions.filter((item) => item !== permission) : [...current.permissions, permission] }));
   const submit = async (event) => { event.preventDefault(); if (!form.name) return; const success = editingRole ? await onUpdateRole(editingRole.id, form) : await onCreateRole(form); if (success) close(); };
-  const remove = async (role) => { if (window.confirm(`Delete the ${role.name} role?`)) await onDeleteRole(role.id); };
+  const confirmDelete = async () => {
+    if (!roleToDelete) return;
+    const deleted = await onDeleteRole(roleToDelete.id);
+    if (deleted) setRoleToDelete(null);
+  };
 
   return <div className="mx-auto max-w-6xl">
     <header className="mb-6 flex items-center justify-between gap-4">
       <div><Typography variant="overline" sx={{ color: '#8b5cf6', letterSpacing: 2, display: 'block', mb: 1 }}>Access control</Typography><Typography variant="h3" sx={{ color: '#0f172a', fontWeight: 700 }}>Roles</Typography></div>
       {can('roles.create') && <Button variant="contained" onClick={openCreate} sx={{ background: 'linear-gradient(135deg, #8b5cf6, #ec4899)', borderRadius: 2, textTransform: 'none', px: 2.5, py: 1.25, fontWeight: 600 }}>Create role</Button>}
     </header>
-    <Grid container spacing={2}>{roles.map((role) => <Grid item xs={12} md={6} xl={4} key={role.id}>
-      <Card sx={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,.06)', height: '100%' }}><CardContent>
-        <Typography variant="button" sx={{ display: 'inline-block', background: '#f3e8ff', color: '#7e22ce', borderRadius: 999, px: 1.5, py: .75, mb: 2 }}>{role.name}</Typography>
-        <Typography sx={{ color: '#475569', mb: 2 }}>{role.description}</Typography>
-        <Typography variant="body2" sx={{ color: '#64748b', mb: 2 }}>{role.permissions?.length || 0} permissions · {role.users ?? 0} users</Typography>
-        <Stack direction="row" spacing={1}>{can('roles.update') && <Button size="small" onClick={() => openEdit(role)} sx={{ color: '#6d28d9', textTransform: 'none' }}>Edit</Button>}{can('roles.delete') && <Button size="small" onClick={() => remove(role)} sx={{ color: '#dc2626', textTransform: 'none' }}>Delete</Button>}</Stack>
-      </CardContent></Card>
-    </Grid>)}</Grid>
+
+    <TableContainer component={Paper} sx={{ border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,.06)', borderRadius: 2 }}>
+      <Table aria-label="Roles">
+        <TableHead sx={{ backgroundColor: '#f8fafc' }}><TableRow>
+          <TableCell sx={{ color: '#475569', fontWeight: 700 }}>S. No.</TableCell>
+          <TableCell sx={{ color: '#475569', fontWeight: 700 }}>Role name</TableCell>
+          <TableCell sx={{ color: '#475569', fontWeight: 700 }}>Users assigned</TableCell>
+          <TableCell align="right" sx={{ color: '#475569', fontWeight: 700 }}>Action</TableCell>
+        </TableRow></TableHead>
+        <TableBody>
+          {roles.map((role, index) => {
+            const assignedUserCount = users.filter((user) => user.role === role.name).length;
+            return <TableRow key={role.id} hover>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell sx={{ color: '#0f172a', fontWeight: 600 }}>{role.name}</TableCell>
+              <TableCell>{assignedUserCount}</TableCell>
+              <TableCell align="right"><Stack direction="row" spacing={1} justifyContent="flex-end">
+                {can('roles.update') && <Button size="small" onClick={() => openEdit(role)} sx={{ color: '#6d28d9', textTransform: 'none' }}>Edit</Button>}
+                {can('roles.delete') && <Button size="small" onClick={() => setRoleToDelete(role)} sx={{ color: '#dc2626', textTransform: 'none' }}>Delete</Button>}
+              </Stack></TableCell>
+            </TableRow>;
+          })}
+          {!roles.length && <TableRow><TableCell colSpan={4} align="center" sx={{ color: '#64748b', py: 4 }}>No roles found.</TableCell></TableRow>}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
     <Dialog open={isOpen} onClose={close} maxWidth="sm" fullWidth><DialogTitle sx={{ color: '#0f172a' }}>{editingRole ? 'Edit role' : 'Create role'}</DialogTitle>
       <form onSubmit={submit}><DialogContent><Stack spacing={2}>
         <TextField label="Role name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} required fullWidth />
@@ -43,6 +68,15 @@ function RolePage({ roles = [], onCreateRole, onUpdateRole, onDeleteRole, can })
           </div>)}</Stack>
         </div>
       </Stack></DialogContent><DialogActions><Button onClick={close}>Cancel</Button><Button type="submit" variant="contained">{editingRole ? 'Save changes' : 'Create role'}</Button></DialogActions></form>
+    </Dialog>
+
+    <Dialog open={Boolean(roleToDelete)} onClose={() => setRoleToDelete(null)} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ color: '#0f172a' }}>Delete role?</DialogTitle>
+      <DialogContent><DialogContentText>Are you sure you want to delete the {roleToDelete?.name} role? This action cannot be undone.</DialogContentText></DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={() => setRoleToDelete(null)} sx={{ textTransform: 'none' }}>Cancel</Button>
+        <Button variant="contained" color="error" onClick={confirmDelete} sx={{ textTransform: 'none' }}>Delete</Button>
+      </DialogActions>
     </Dialog>
   </div>;
 }
