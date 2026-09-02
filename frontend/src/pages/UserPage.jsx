@@ -12,21 +12,15 @@ import {
   IconButton,
   InputLabel,
   MenuItem,
-  Paper,
   Pagination,
   Select,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Tooltip,
   Typography,
 } from '@mui/material';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
+import DataTable from '../components/DataTable';
 
 const emptyForm = {
   name: '',
@@ -133,20 +127,20 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
           {users.length === 0 ? (
             <Typography sx={{ color: '#475569', py: 2 }}>No users created yet.</Typography>
           ) : (
-            <TableContainer component={Paper} sx={{ background: 'transparent', boxShadow: 'none' }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>S. No.</TableCell>
-                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Name</TableCell>
-                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Email</TableCell>
-                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Role</TableCell>
-                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Status</TableCell>
-                    <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {users.map((user, index) => {
+            <DataTable
+              columns={[
+                {
+                  key: 'serial',
+                  label: 'S. No.',
+                  render: (user, index) => ((pagination?.page || 1) - 1) * (pagination?.limit || users.length) + index + 1,
+                },
+                { key: 'name', label: 'Name', cellSx: { color: '#334155' }, render: (user) => user.name },
+                { key: 'email', label: 'Email', cellSx: { color: '#334155' }, render: (user) => user.email },
+                { key: 'role', label: 'Role', cellSx: { color: '#334155' }, render: (user) => user.role },
+                {
+                  key: 'status',
+                  label: 'Status',
+                  render: (user) => {
                     const statusColor =
                       user.status === 'Active'
                         ? '#34d399'
@@ -155,37 +149,40 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
                           : '#cbd5e1';
 
                     return (
-                      <TableRow key={`${user.email}-${user.name}`} sx={{ '& td': { borderColor: 'rgba(148,163,184,0.15)' } }}>
-                        <TableCell sx={{ color: '#334155' }}>{((pagination?.page || 1) - 1) * (pagination?.limit || users.length) + index + 1}</TableCell>
-                        <TableCell sx={{ color: '#334155' }}>{user.name}</TableCell>
-                        <TableCell sx={{ color: '#334155' }}>{user.email}</TableCell>
-                        <TableCell sx={{ color: '#334155' }}>{user.role}</TableCell>
-                        <TableCell>
-                          <span
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              borderRadius: 999,
-                              padding: '6px 10px',
-                              fontSize: '12px',
-                              fontWeight: 700,
-                              color: statusColor,
-                              background: statusColor + '22',
-                            }}
-                          >
-                            {user.status}
-                          </span>
-                        </TableCell>
-                        <TableCell><Stack direction="row" spacing={0.5}>
-                          {can('users.update') && <Tooltip title="Edit user"><IconButton aria-label={`Edit ${user.name}`} size="small" onClick={() => openEditDialog(user)} sx={{ color: '#6d28d9' }}><Pencil size={18} /></IconButton></Tooltip>}
-                          {can('users.delete') && <Tooltip title="Delete user"><IconButton aria-label={`Delete ${user.name}`} size="small" onClick={() => setDeletingUser(user)} sx={{ color: '#dc2626' }}><Trash2 size={18} /></IconButton></Tooltip>}
-                        </Stack></TableCell>
-                      </TableRow>
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          borderRadius: 999,
+                          padding: '6px 10px',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          color: statusColor,
+                          background: statusColor + '22',
+                        }}
+                      >
+                        {user.status}
+                      </span>
                     );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  },
+                },
+                {
+                  key: 'action',
+                  label: 'Action',
+                  render: (user) => (
+                    <Stack direction="row" spacing={0.5}>
+                      {can('users.update') && <Tooltip title="Edit user"><IconButton aria-label={`Edit ${user.name}`} size="small" onClick={() => openEditDialog(user)} sx={{ color: '#6d28d9' }}><Pencil size={18} /></IconButton></Tooltip>}
+                      {can('users.delete') && <Tooltip title="Delete user"><IconButton aria-label={`Delete ${user.name}`} size="small" onClick={() => setDeletingUser(user)} sx={{ color: '#dc2626' }}><Trash2 size={18} /></IconButton></Tooltip>}
+                    </Stack>
+                  ),
+                },
+              ]}
+              rows={users}
+              emptyState="No users created yet."
+              getRowKey={(user) => `${user.email}-${user.name}`}
+              containerSx={{ background: 'transparent', boxShadow: 'none' }}
+              rowSx={{ '& td': { borderColor: 'rgba(148,163,184,0.15)' } }}
+            />
           )}
 
           {pagination?.totalPages > 1 && (
