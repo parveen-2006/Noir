@@ -1,7 +1,18 @@
 import { roleStore, sanitizeUser, sanitizeUsers, userStore } from '../data/store.js';
 
 export const getUsers = (req, res) => {
-  return res.status(200).json({ users: sanitizeUsers(userStore) });
+  const requestedPage = Number.parseInt(req.query.page, 10);
+  const requestedLimit = Number.parseInt(req.query.limit, 10);
+  const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 100) : 10;
+  const total = userStore.length;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const page = Number.isFinite(requestedPage) ? Math.min(Math.max(requestedPage, 1), totalPages) : 1;
+  const startIndex = (page - 1) * limit;
+
+  return res.status(200).json({
+    users: sanitizeUsers(userStore.slice(startIndex, startIndex + limit)),
+    pagination: { page, limit, total, totalPages },
+  });
 };
 
 export const createUser = (req, res) => {

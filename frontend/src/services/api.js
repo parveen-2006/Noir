@@ -87,7 +87,7 @@ export const api = {
       expiresAt,
     };
   },
-  getUsers: () => apiClient.get('/users'),
+  getUsers: (params) => apiClient.get('/users', { params }),
   createUser: (payload) => apiClient.post('/users', payload),
   updateUser: (id, payload) => apiClient.put(`/users/${id}`, payload),
   getRoles: () => apiClient.get('/roles'),

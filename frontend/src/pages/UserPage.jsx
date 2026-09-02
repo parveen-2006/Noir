@@ -8,9 +8,11 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
+  Pagination,
   Select,
   Stack,
   Table,
@@ -22,6 +24,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { Plus } from 'lucide-react';
 
 const emptyForm = {
   name: '',
@@ -31,7 +34,7 @@ const emptyForm = {
   status: 'Active',
 };
 
-function UserPage({ users = [], roles = [], onCreateUser, onUpdateUser, can }) {
+function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUser, onUpdateUser, can }) {
   const [isOpen, setIsOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -101,20 +104,18 @@ function UserPage({ users = [], roles = [], onCreateUser, onUpdateUser, can }) {
             User
           </Typography>
         </div>
-        {can('users.create') && <Button
-          variant="contained"
+        {can('users.create') && <IconButton
           onClick={openCreateDialog}
+          aria-label="Add user"
+          title="Add user"
           sx={{
-            background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
-            borderRadius: 2,
-            textTransform: 'none',
-            px: 2.5,
-            py: 1.25,
-            fontWeight: 600,
+            backgroundColor: '#2563eb',
+            color: '#fff',
+            '&:hover': { backgroundColor: '#1d4ed8' },
           }}
         >
-          Add user
-        </Button>}
+          <Plus size={22} strokeWidth={2.5} />
+        </IconButton>}
       </header>
 
       <Card sx={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
@@ -174,6 +175,18 @@ function UserPage({ users = [], roles = [], onCreateUser, onUpdateUser, can }) {
                 </TableBody>
               </Table>
             </TableContainer>
+          )}
+
+          {pagination?.totalPages > 1 && (
+            <Stack alignItems="center" sx={{ pt: 3 }}>
+              <Pagination
+                page={pagination.page}
+                count={pagination.totalPages}
+                onChange={(_, page) => onPageChange(page)}
+                color="primary"
+                shape="rounded"
+              />
+            </Stack>
           )}
         </CardContent>
       </Card>

@@ -28,6 +28,9 @@ function App() {
   const roles = useSelector((state) => state.roles.list);
   const currentUser = useSelector((state) => state.auth.user);
   const [appError, setAppError] = useState('');
+  const [userPage, setUserPage] = useState(1);
+  const [userRefreshKey, setUserRefreshKey] = useState(0);
+  const [userPagination, setUserPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const permissions = roles.find((role) => role.name === currentUser?.role)?.permissions || currentUser?.permissions || [];
   const can = (permission) => permissions.includes(permission);
 
@@ -81,12 +84,13 @@ function App() {
     const loadData = async () => {
       try {
         const [userResponse, roleResponse] = await Promise.all([
-          api.getUsers(),
+          api.getUsers({ page: userPage, limit: 10 }),
           api.getRoles(),
         ]);
 
         dispatch(setUsers(userResponse.users || []));
         dispatch(setRoles(roleResponse.roles || []));
+        setUserPagination(userResponse.pagination || { page: userPage, totalPages: 1, total: 0 });
       } catch (error) {
         const message = `Unable to load users and roles: ${error.message}`;
         console.error('[Noir] Data loading failed:', error);
@@ -95,7 +99,7 @@ function App() {
     };
 
     loadData();
-  }, [dispatch, isAuthenticated]);
+  }, [dispatch, isAuthenticated, userPage, userRefreshKey]);
 
   const handleLogin = async ({ email, password }) => {
     try {
@@ -123,6 +127,8 @@ function App() {
     try {
       const response = await api.createUser(newUser);
       dispatch(addUser(response.user));
+      setUserPage(1);
+      setUserRefreshKey((current) => current + 1);
       return true;
     } catch (error) {
       console.error(error.message);
@@ -134,6 +140,7 @@ function App() {
     try {
       const response = await api.updateUser(id, updatedUser);
       dispatch(updateUser(response.user));
+      setUserRefreshKey((current) => current + 1);
       return true;
     } catch (error) {
       const message = `Unable to update user: ${error.message}`;
@@ -193,7 +200,7 @@ function App() {
         )}
         <Routes>
           <Route path="/" element={can('dashboard.view') ? <DashboardPage /> : <AccessDenied />} />
-          <Route path="/users" element={can('users.view') ? <UserPage onCreateUser={handleCreateUser} onUpdateUser={handleUpdateUser} users={users} roles={roles} can={can} /> : <AccessDenied />} />
+          <Route path="/users" element={can('users.view') ? <UserPage onCreateUser={handleCreateUser} onUpdateUser={handleUpdateUser} users={users} roles={roles} pagination={userPagination} onPageChange={setUserPage} can={can} /> : <AccessDenied />} />
           <Route path="/roles" element={can('roles.view') ? <RolePage roles={roles} users={users} onCreateRole={handleCreateRole} onUpdateRole={handleUpdateRole} onDeleteRole={handleDeleteRole} can={can} /> : <AccessDenied />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
