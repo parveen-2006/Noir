@@ -1,104 +1,33 @@
-import { roleStore, sanitizeUser, sanitizeUsers, userStore } from '../data/store.js';
+import { createUser as createUserService, deleteUser as deleteUserService, listUsers, updateUser as updateUserService } from '../services/userService.js';
 
 export const getUsers = (req, res) => {
-  const requestedPage = Number.parseInt(req.query.page, 10);
-  const requestedLimit = Number.parseInt(req.query.limit, 10);
-  const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 100) : 10;
-  const total = userStore.length;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
-  const page = Number.isFinite(requestedPage) ? Math.min(Math.max(requestedPage, 1), totalPages) : 1;
-  const startIndex = (page - 1) * limit;
-
-  return res.status(200).json({
-    users: sanitizeUsers(userStore.slice(startIndex, startIndex + limit)),
-    pagination: { page, limit, total, totalPages },
-  });
+  try {
+    return res.status(200).json(listUsers(req.query));
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
+  }
 };
 
 export const createUser = (req, res) => {
-  const { name, email, password, role, status } = req.body || {};
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'Name, email, and password are required.' });
+  try {
+    return res.status(201).json(createUserService(req.body));
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
   }
-
-  const existingUser = userStore.find(
-    (user) => user.email.toLowerCase() === String(email).toLowerCase(),
-  );
-
-  if (existingUser) {
-    return res.status(409).json({ message: 'User already exists with this email.' });
-  }
-
-  const newUser = {
-    id: crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`,
-    name,
-    email,
-    password,
-    role: role || 'Manager',
-    status: status || 'Active',
-  };
-
-  userStore.unshift(newUser);
-
-  return res.status(201).json({
-    message: 'User created successfully',
-    user: sanitizeUser(newUser),
-  });
 };
 
 export const updateUser = (req, res) => {
-  const { id } = req.params;
-  const { name, email, password, role, status } = req.body || {};
-
-  const index = userStore.findIndex((user) => user.id === id);
-  if (index === -1) {
-    return res.status(404).json({ message: 'User not found.' });
+  try {
+    return res.status(200).json(updateUserService(req.params.id, req.body));
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
   }
-
-  if (role && !roleStore.some((item) => item.name === role)) {
-    return res.status(400).json({ message: 'Select a valid role.' });
-  }
-
-  const duplicateEmail = userStore.some(
-    (user) => user.id !== id && user.email.toLowerCase() === String(email || '').toLowerCase(),
-  );
-
-  if (email && duplicateEmail) {
-    return res.status(409).json({ message: 'Another user already exists with this email.' });
-  }
-
-  if (role && !roleStore.some((item) => item.name === role)) {
-    return res.status(400).json({ message: 'Select a valid role.' });
-  }
-
-  userStore[index] = {
-    ...userStore[index],
-    name: name || userStore[index].name,
-    email: email || userStore[index].email,
-    password: password || userStore[index].password,
-    role: role || userStore[index].role,
-    status: status || userStore[index].status,
-  };
-
-  return res.status(200).json({
-    message: 'User updated successfully',
-    user: sanitizeUser(userStore[index]),
-  });
 };
 
 export const deleteUser = (req, res) => {
-  const { id } = req.params;
-  const index = userStore.findIndex((user) => user.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ message: 'User not found.' });
+  try {
+    return res.status(200).json(deleteUserService(req.params.id));
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({ message: error.message });
   }
-
-  const [removedUser] = userStore.splice(index, 1);
-
-  return res.status(200).json({
-    message: 'User deleted successfully',
-    user: sanitizeUser(removedUser),
-  });
 };
