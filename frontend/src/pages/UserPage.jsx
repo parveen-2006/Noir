@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import {
   Button,
-  Card,
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
@@ -122,13 +120,12 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
         </IconButton>}
       </header>
 
-      <Card sx={{ background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
-        <CardContent>
-          {users.length === 0 ? (
-            <Typography sx={{ color: '#475569', py: 2 }}>No users created yet.</Typography>
-          ) : (
-            <DataTable
-              columns={[
+      <div>
+        {users.length === 0 ? (
+          <Typography sx={{ color: '#475569', py: 2 }}>No users created yet.</Typography>
+        ) : (
+          <DataTable
+            columns={[
                 {
                   key: 'serial',
                   label: 'S. No.',
@@ -180,24 +177,23 @@ function UserPage({ users = [], roles = [], pagination, onPageChange, onCreateUs
               rows={users}
               emptyState="No users created yet."
               getRowKey={(user) => `${user.email}-${user.name}`}
-              containerSx={{ background: 'transparent', boxShadow: 'none' }}
+              containerSx={{ background: 'transparent', boxShadow: 'none', border: 'none' }}
               rowSx={{ '& td': { borderColor: 'rgba(148,163,184,0.15)' } }}
             />
           )}
 
-          {pagination?.totalPages > 1 && (
-            <Stack alignItems="center" sx={{ pt: 3 }}>
-              <Pagination
-                page={pagination.page}
-                count={pagination.totalPages}
-                onChange={(_, page) => onPageChange(page)}
-                color="primary"
-                shape="rounded"
-              />
-            </Stack>
-          )}
-        </CardContent>
-      </Card>
+        {pagination?.totalPages > 1 && (
+          <Stack alignItems="center" sx={{ pt: 3 }}>
+            <Pagination
+              page={pagination.page}
+              count={pagination.totalPages}
+              onChange={(_, page) => onPageChange(page)}
+              color="primary"
+              shape="rounded"
+            />
+          </Stack>
+        )}
+      </div>
 
       <Dialog open={isOpen} onClose={closeDialog} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ color: '#0f172a', background: '#fff' }}>{editingUser ? 'Edit user' : 'Create user'}</DialogTitle>

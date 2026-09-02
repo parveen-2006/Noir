@@ -13,9 +13,10 @@ function DataTable({
     <TableContainer
       component={Paper}
       sx={{
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
-        borderRadius: 2,
+        border: 'none',
+        boxShadow: 'none',
+        borderRadius: 0,
+        background: 'transparent',
         ...containerSx,
       }}
     >
