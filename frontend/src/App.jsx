@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import UserPage from './pages/UserPage';
@@ -28,6 +29,7 @@ function App() {
   const roles = useSelector((state) => state.roles.list);
   const currentUser = useSelector((state) => state.auth.user);
   const [appError, setAppError] = useState('');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userPage, setUserPage] = useState(1);
   const [userRefreshKey, setUserRefreshKey] = useState(0);
   const [userPagination, setUserPagination] = useState({ page: 1, totalPages: 1, total: 0 });
@@ -189,21 +191,29 @@ function App() {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <Sidebar onLogout={handleLogout} can={can} />
+      <Sidebar
+        onLogout={handleLogout}
+        can={can}
+        collapsed={isSidebarCollapsed}
+        onExpand={() => setIsSidebarCollapsed(false)}
+      />
 
-      <main className="flex-1 p-4 md:p-8">
-        {appError && (
-          <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100" role="alert">
-            <span>{appError}</span>
-            <button type="button" onClick={() => setAppError('')} className="text-amber-700 hover:text-amber-950" aria-label="Dismiss error">Dismiss</button>
-          </div>
-        )}
-        <Routes>
-          <Route path="/" element={can('dashboard.view') ? <DashboardPage /> : <AccessDenied />} />
-          <Route path="/users" element={can('users.view') ? <UserPage onCreateUser={handleCreateUser} onUpdateUser={handleUpdateUser} users={users} roles={roles} pagination={userPagination} onPageChange={setUserPage} can={can} /> : <AccessDenied />} />
-          <Route path="/roles" element={can('roles.view') ? <RolePage roles={roles} users={users} onCreateRole={handleCreateRole} onUpdateRole={handleUpdateRole} onDeleteRole={handleDeleteRole} can={can} /> : <AccessDenied />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+      <main className="flex-1">
+        <Navbar user={currentUser} onToggleSidebar={() => setIsSidebarCollapsed((collapsed) => !collapsed)} />
+        <div className="p-4 md:p-8">
+          {appError && (
+            <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-100" role="alert">
+              <span>{appError}</span>
+              <button type="button" onClick={() => setAppError('')} className="text-amber-700 hover:text-amber-950" aria-label="Dismiss error">Dismiss</button>
+            </div>
+          )}
+          <Routes>
+            <Route path="/" element={can('dashboard.view') ? <DashboardPage /> : <AccessDenied />} />
+            <Route path="/users" element={can('users.view') ? <UserPage onCreateUser={handleCreateUser} onUpdateUser={handleUpdateUser} users={users} roles={roles} pagination={userPagination} onPageChange={setUserPage} can={can} /> : <AccessDenied />} />
+            <Route path="/roles" element={can('roles.view') ? <RolePage roles={roles} users={users} onCreateRole={handleCreateRole} onUpdateRole={handleUpdateRole} onDeleteRole={handleDeleteRole} can={can} /> : <AccessDenied />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
       </main>
     </div>
   );

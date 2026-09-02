@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, IconButton, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography } from '@mui/material';
+import { Pencil, Trash2 } from 'lucide-react';
 
 const permissionModules = [
   { name: 'Dashboard', permissions: [['dashboard.view', 'View dashboard']] },
@@ -36,23 +37,32 @@ function RolePage({ roles = [], users = [], onCreateRole, onUpdateRole, onDelete
         <TableHead sx={{ backgroundColor: '#f8fafc' }}><TableRow>
           <TableCell sx={{ color: '#475569', fontWeight: 700 }}>S. No.</TableCell>
           <TableCell sx={{ color: '#475569', fontWeight: 700 }}>Role name</TableCell>
-          <TableCell sx={{ color: '#475569', fontWeight: 700 }}>Users assigned</TableCell>
-          <TableCell align="right" sx={{ color: '#475569', fontWeight: 700 }}>Action</TableCell>
+          <TableCell sx={{ color: '#475569', fontWeight: 700 }}>Users</TableCell>
+          <TableCell sx={{ color: '#475569', fontWeight: 700 }}>Permissions</TableCell>
+          <TableCell align="right" sx={{ color: '#475569', fontWeight: 700, width: 140 }}>Action</TableCell>
         </TableRow></TableHead>
         <TableBody>
           {roles.map((role, index) => {
             const assignedUserCount = users.filter((user) => user.role === role.name).length;
+            const rolePermissions = Array.isArray(role.permissions) ? role.permissions : [];
+            const visiblePermissions = rolePermissions.slice(0, 2).join(', ');
+            const additionalPermissionCount = rolePermissions.length - 2;
+            const permissionSummary = visiblePermissions
+              ? `${visiblePermissions}${additionalPermissionCount > 0 ? ` +${additionalPermissionCount}` : ''}`
+              : 'None';
+
             return <TableRow key={role.id} hover>
               <TableCell>{index + 1}</TableCell>
               <TableCell sx={{ color: '#0f172a', fontWeight: 600 }}>{role.name}</TableCell>
               <TableCell>{assignedUserCount}</TableCell>
-              <TableCell align="right"><Stack direction="row" spacing={1} justifyContent="flex-end">
-                {can('roles.update') && <Button size="small" onClick={() => openEdit(role)} sx={{ color: '#6d28d9', textTransform: 'none' }}>Edit</Button>}
-                {can('roles.delete') && <Button size="small" onClick={() => setRoleToDelete(role)} sx={{ color: '#dc2626', textTransform: 'none' }}>Delete</Button>}
+              <TableCell sx={{ color: '#2563eb', maxWidth: 420 }}>{permissionSummary}</TableCell>
+              <TableCell align="right" sx={{ width: 140 }}><Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                {can('roles.update') && <Tooltip title="Edit role"><IconButton aria-label={`Edit ${role.name}`} size="small" onClick={() => openEdit(role)} sx={{ color: '#6d28d9' }}><Pencil size={18} /></IconButton></Tooltip>}
+                {can('roles.delete') && <Tooltip title="Delete role"><IconButton aria-label={`Delete ${role.name}`} size="small" onClick={() => setRoleToDelete(role)} sx={{ color: '#dc2626' }}><Trash2 size={18} /></IconButton></Tooltip>}
               </Stack></TableCell>
             </TableRow>;
           })}
-          {!roles.length && <TableRow><TableCell colSpan={4} align="center" sx={{ color: '#64748b', py: 4 }}>No roles found.</TableCell></TableRow>}
+          {!roles.length && <TableRow><TableCell colSpan={5} align="center" sx={{ color: '#64748b', py: 4 }}>No roles found.</TableCell></TableRow>}
         </TableBody>
       </Table>
     </TableContainer>
