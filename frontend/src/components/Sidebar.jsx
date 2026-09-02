@@ -9,8 +9,8 @@ const items = [
 
 function Sidebar({ onLogout, can, collapsed, onExpand }) {
   return (
-    <aside className={`${collapsed ? 'w-20' : 'w-64'} min-h-screen shrink-0 border-r border-slate-200 bg-white shadow-sm`}>
-      <div className={`flex h-17.5 items-center gap-3 border-b border-slate-200 px-5 ${collapsed ? 'justify-center px-0' : ''}`}>
+    <aside className={`${collapsed ? 'w-20' : 'w-64'} min-h-screen shrink-0 border-r border-slate-200 bg-white shadow-sm transition-[width] duration-300 ease-in-out`}>
+      <div className={`flex h-17.5 items-center gap-3 border-b border-slate-200 px-5 transition-[padding] duration-300 ease-in-out ${collapsed ? 'justify-center px-0' : ''}`}>
         <div className="grid h-10 w-10 place-items-center rounded-xl bg-linear-to-br from-violet-500 to-pink-500 font-bold text-white">
           N
         </div>
@@ -20,7 +20,7 @@ function Sidebar({ onLogout, can, collapsed, onExpand }) {
         </div>}
       </div>
 
-      <nav className={`flex flex-1 flex-col justify-between gap-2 ${collapsed ? 'p-2' : 'p-5'}`}>
+      <nav className={`flex flex-1 flex-col justify-between gap-2 transition-[padding] duration-300 ease-in-out ${collapsed ? 'p-2' : 'p-5'}`}>
         <div className="space-y-2">
           {items.filter(({ to }) => can(to === '/' ? 'dashboard.view' : `${to.slice(1)}.view`)).map(({ to, label, icon: Icon }) => (
             <NavLink
