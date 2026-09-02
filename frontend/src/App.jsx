@@ -9,7 +9,7 @@ import UserPage from './pages/UserPage';
 import RolePage from './pages/RolePage';
 import AccessDenied from './components/AccessDenied';
 import { api } from './services/api';
-import { loginSuccess, logout } from './store/authSlice';
+import { loginSuccess, updateCurrentUser, logout } from './store/authSlice';
 import { setUsers, addUser, updateUser, removeUser } from './store/userSlice';
 import { setRoles, addRole, updateRole, removeRole } from './store/roleSlice';
 import './styles.css';
@@ -35,6 +35,12 @@ function App() {
   const [userPagination, setUserPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const permissions = roles.find((role) => role.name === currentUser?.role)?.permissions || currentUser?.permissions || [];
   const can = (permission) => permissions.includes(permission);
+
+  const syncCurrentUser = (user) => {
+    dispatch(updateCurrentUser(user));
+    const session = api.getStoredSession();
+    if (session) api.saveSession({ ...session, user });
+  };
 
   useEffect(() => {
     const storedSession = api.getStoredSession();
@@ -142,6 +148,7 @@ function App() {
     try {
       const response = await api.updateUser(id, updatedUser);
       dispatch(updateUser(response.user));
+      if (currentUser?.id === id) syncCurrentUser(response.user);
       setUserRefreshKey((current) => current + 1);
       return true;
     } catch (error) {
@@ -177,8 +184,16 @@ function App() {
 
   const handleUpdateRole = async (id, updatedRole) => {
     try {
+      const previousRole = roles.find((role) => role.id === id);
       const response = await api.updateRole(id, updatedRole);
       dispatch(updateRole(response.role));
+      if (currentUser?.role === previousRole?.name) {
+        syncCurrentUser({
+          ...currentUser,
+          role: response.role.name,
+          permissions: response.role.permissions,
+        });
+      }
       return true;
     } catch (error) {
       setAppError(`Unable to update role: ${error.message}`);
