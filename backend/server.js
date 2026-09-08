@@ -18,8 +18,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes);
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+const startServer = async () => {
+  await connectDatabase();
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+};
 
-connectDatabase();
+startServer().catch(() => {
+  process.exit(1);
+});
