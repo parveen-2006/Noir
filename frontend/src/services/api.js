@@ -3,6 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:5000/api';
 const AUTH_STORAGE_KEY = 'noir_auth_session';
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+const SESSION_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 
 const toTimestamp = (value) => {
   if (typeof value === 'number') return value;
@@ -71,21 +72,48 @@ apiClient.interceptors.response.use(
 export const api = {
   login: async (payload) => {
     const response = await apiClient.post('/auth/login', payload);
-    // Use the expiry issued by the API. It is an ISO string today, while
-    // restored sessions use a numeric timestamp, so normalize it before
-    // persisting and comparing it.
     const expiresAt = toTimestamp(response.expiresAt) || Date.now() + SESSION_TTL_MS;
     const session = {
       token: response.token,
       expiresAt,
       user: response.user,
+      lastSeenAt: Date.now(),
     };
 
     saveStoredSession(session);
     return {
       ...response,
       expiresAt,
+      lastSeenAt: session.lastSeenAt,
     };
+  },
+  continueSession: async () => {
+    const currentSession = readStoredSession();
+    if (!currentSession) {
+      return { expired: true };
+    }
+
+    const response = await apiClient.post('/sessions/continue');
+    const nextSession = {
+      ...currentSession,
+      lastSeenAt: Number(response.lastSeenAt || Date.now()),
+      expiresAt: currentSession.expiresAt,
+    };
+
+    saveStoredSession(nextSession);
+    return nextSession;
+  },
+  logoutSession: async () => {
+    try {
+      const session = readStoredSession();
+      if (session?.token) {
+        await apiClient.delete('/sessions/logout');
+      }
+    } catch {
+      // Ignore backend logout failures; the client session is still cleared.
+    } finally {
+      clearStoredSession();
+    }
   },
   getUsers: (params) => apiClient.get('/users', { params }),
   createUser: (payload) => apiClient.post('/users', payload),
@@ -98,6 +126,7 @@ export const api = {
   getStoredSession: readStoredSession,
   saveSession: saveStoredSession,
   clearSession: clearStoredSession,
+  SESSION_CHECK_INTERVAL_MS,
 };
 
 export const apiService = api;

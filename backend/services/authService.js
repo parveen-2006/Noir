@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
 import Role from '../models/Role.js';
 import User from '../models/User.js';
+import { saveSession } from './sessionService.js';
 
 const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 const getTokenSecret = () => process.env.JWT_SECRET || 'noir-development-secret';
@@ -40,12 +41,14 @@ export const authenticateUser = async ({ email, password } = {}) => {
   }
 
   const role = await Role.findOne({ name: user.role });
+  const expiresAt = Date.now() + TOKEN_TTL_MS;
   const token = createSessionToken(user);
+  await saveSession({ userId: user.id, token, expiresAt });
 
   return {
     message: 'Login successful',
     token,
-    expiresAt: new Date(Date.now() + TOKEN_TTL_MS).toISOString(),
+    expiresAt: new Date(expiresAt).toISOString(),
     user: {
       id: user.id,
       name: user.name,

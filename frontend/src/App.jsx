@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
@@ -32,9 +33,13 @@ function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [userPage, setUserPage] = useState(1);
   const [userRefreshKey, setUserRefreshKey] = useState(0);
+  const [showSessionPrompt, setShowSessionPrompt] = useState(false);
+  const [sessionCountdown, setSessionCountdown] = useState(30);
   const [userPagination, setUserPagination] = useState({ page: 1, totalPages: 1, total: 0 });
   const permissions = roles.find((role) => role.name === currentUser?.role)?.permissions || currentUser?.permissions || [];
   const can = (permission) => permissions.includes(permission);
+
+  const sessionExpiresAt = useMemo(() => toTimestamp(expiresAt), [expiresAt]);
 
   const syncCurrentUser = (user) => {
     dispatch(updateCurrentUser(user));
@@ -87,6 +92,50 @@ function App() {
   }, [dispatch, expiresAt, isAuthenticated]);
 
   useEffect(() => {
+    if (!isAuthenticated || !expiresAt) {
+      setShowSessionPrompt(false);
+      setSessionCountdown(30);
+      return;
+    }
+
+    const checkInterval = setInterval(() => {
+      const remainingMs = sessionExpiresAt - Date.now();
+      if (remainingMs <= 0) {
+        api.clearSession();
+        dispatch(logout());
+        clearInterval(checkInterval);
+        return;
+      }
+
+      if (!showSessionPrompt) {
+        setShowSessionPrompt(true);
+        setSessionCountdown(30);
+      }
+    }, api.SESSION_CHECK_INTERVAL_MS || 60 * 60 * 1000);
+
+    return () => clearInterval(checkInterval);
+  }, [dispatch, isAuthenticated, expiresAt, sessionExpiresAt, showSessionPrompt]);
+
+  useEffect(() => {
+    if (!showSessionPrompt) return undefined;
+
+    setSessionCountdown(30);
+    const countdownInterval = setInterval(() => {
+      setSessionCountdown((current) => {
+        if (current <= 1) {
+          clearInterval(countdownInterval);
+          handleLogout();
+          return 0;
+        }
+
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(countdownInterval);
+  }, [showSessionPrompt]);
+
+  useEffect(() => {
     if (!isAuthenticated) return;
 
     const loadData = async () => {
@@ -109,6 +158,21 @@ function App() {
     loadData();
   }, [dispatch, isAuthenticated, userPage, userRefreshKey]);
 
+  const handleSessionContinue = async () => {
+    try {
+      const response = await api.continueSession();
+      if (response?.expired) {
+        handleLogout();
+        return;
+      }
+      setShowSessionPrompt(false);
+      setSessionCountdown(30);
+    } catch (error) {
+      console.error('[Noir] Session continue failed:', error);
+      handleLogout();
+    }
+  };
+
   const handleLogin = async ({ email, password }) => {
     try {
       const response = await api.login({ email, password });
@@ -127,8 +191,10 @@ function App() {
   };
 
   const handleLogout = () => {
-    api.clearSession();
+    api.logoutSession();
     dispatch(logout());
+    setShowSessionPrompt(false);
+    setSessionCountdown(30);
   };
 
   const handleCreateUser = async (newUser) => {
@@ -242,6 +308,22 @@ function App() {
           </Routes>
         </div>
       </main>
+
+      <Dialog open={showSessionPrompt} onClose={handleLogout} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ color: '#0f172a' }}>Continue your session?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Your session is still active, but you have been away for an hour. You have {sessionCountdown} seconds to choose. Continue this session or sign out now.
+          </DialogContentText>
+          <DialogContentText sx={{ mt: 1, color: '#7c2d12', fontWeight: 700 }}>
+            Auto sign out in {sessionCountdown}s
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleLogout} color="secondary">Sign out</Button>
+          <Button variant="contained" onClick={handleSessionContinue}>Continue</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

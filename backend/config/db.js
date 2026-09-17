@@ -1,7 +1,10 @@
+import dns from 'node:dns'
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 import Role from '../models/Role.js'
 import User from '../models/User.js'
+
+dns.setServers(['8.8.8.8', '1.1.1.1'])
 
 const defaultPermissions = [
   'dashboard.view', 'users.view', 'users.create', 'users.update', 'users.delete',

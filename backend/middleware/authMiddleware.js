@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import User from '../models/User.js';
+import { getStoredSession } from '../services/sessionService.js';
 
 const getTokenSecret = () => process.env.JWT_SECRET || 'noir-development-secret';
 
@@ -30,6 +31,11 @@ export const requireAuth = async (req, res, next) => {
     const session = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
     if (!session.sub || !session.exp || session.exp <= Date.now()) {
       return res.status(401).json({ message: 'Authentication token has expired.' });
+    }
+
+    const storedSession = await getStoredSession(session.sub);
+    if (!storedSession || storedSession.token !== token || Number(storedSession.expiresAt) <= Date.now()) {
+      return res.status(401).json({ message: 'Session is no longer active.' });
     }
 
     const user = await User.findById(session.sub);
