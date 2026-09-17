@@ -15,7 +15,7 @@ function Sidebar({ onLogout, can, collapsed, onExpand }) {
           N
         </div>
         {!collapsed && <div>
-          <p className="text-base font-bold tracking-[0.18em] text-slate-900">Template        </p>
+          <p className="text-base font-bold tracking-[0.18em] text-slate-900">Template</p>
           <span className="text-xs text-slate-500">Admin</span>
         </div>}
       </div>
